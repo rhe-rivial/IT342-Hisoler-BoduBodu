@@ -1,0 +1,13 @@
+:root {
+  --bg: #F4EFEA;
+  --card: #FFFFFF;
+  --primary: #B45309;
+  --primary-dark: #9A3F06;
+  --accent: #556B2F;
+  --text-main: #2A2A2A;
+  --text-muted: #7A746E;
+  --danger: #B91C1C;
+
+  --radius: 12px;
+  --transition: all 0.2s ease-in-out;
+}
