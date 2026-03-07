@@ -1,0 +1,35 @@
+.notification {
+  position: fixed;
+  top: 40px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 320px;
+  padding: 1rem 1.5rem;
+  border-radius: 14px;
+  font-weight: 500;
+  animation: fadeSlide 0.3s ease forwards;
+  box-shadow: 0 20px 40px rgba(0,0,0,0.08);
+}
+
+.notification.error {
+  background: #fff5f5;
+  color: #b91c1c;
+  border: 1px solid #fecaca;
+}
+
+.notification.success {
+  background: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+@keyframes fadeSlide {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -10px);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}

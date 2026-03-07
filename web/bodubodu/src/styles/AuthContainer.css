@@ -1,0 +1,228 @@
+/* Auth Page Wrapper */
+.auth-wrapper {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f5f5f4, #ece7e2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+/* Main Container */
+.auth-container {
+  background: #fff;
+  width: 850px;
+  max-width: 100%;
+  min-height: 580px; /* Increased from 520px */
+  border-radius: 20px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 30px 60px rgba(0, 0, 0, 0.08);
+}
+
+/* Form Containers */
+.auth-container .form-container {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 50%;
+  padding: 45px 40px; /* Reduced from 50px */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  transition: all 0.6s ease-in-out;
+  opacity: 1;
+  overflow-y: auto;
+}
+
+.auth-container .form-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.auth-container .form-container::-webkit-scrollbar-thumb {
+  background: rgba(0,0,0,0.1);
+  border-radius: 4px;
+}
+
+
+.auth-container .form-container h2 {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #1f2937;
+  margin-bottom: 1.2rem; /* Reduced from 1.5rem */
+  text-align: left;
+}
+
+/* Login Form */
+.auth-container .login-container {
+  left: 0;
+  z-index: 2;
+}
+
+.auth-container.active .login-container {
+  transform: translateX(100%);
+  opacity: 0;
+  pointer-events: none;
+  transition: transform 0.6s ease-in-out, opacity 0.3s ease-in-out;
+}
+
+/* Register Form */
+.auth-container .register-container {
+  left: 0;
+  opacity: 0;
+  z-index: 1;
+  pointer-events: none;
+  transition: transform 0.6s ease-in-out, opacity 0.3s ease-in-out 0.2s;
+}
+
+.auth-container.active .register-container {
+  transform: translateX(100%);
+  opacity: 1;
+  z-index: 5;
+  pointer-events: all;
+  transition: transform 0.6s ease-in-out, opacity 0.3s ease-in-out 0.3s;
+}
+
+/* Overlay Container */
+.auth-container .overlay-container {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 50%;
+  height: 100%;
+  overflow: hidden;
+  transition: transform 0.6s ease-in-out;
+  z-index: 100;
+}
+
+.auth-container.active .overlay-container {
+  transform: translateX(-100%);
+}
+
+/* Overlay */
+.auth-container .overlay {
+  background: linear-gradient(135deg, var(--primary), #d97706);
+  color: white;
+  position: relative;
+  left: -100%;
+  height: 100%;
+  width: 200%;
+  transform: translateX(0);
+  transition: transform 0.6s ease-in-out;
+}
+
+.auth-container.active .overlay {
+  transform: translateX(50%);
+}
+
+/* Overlay Panels */
+.auth-container .overlay-panel {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  padding: 0 40px;
+  text-align: center;
+  top: 0;
+  height: 100%;
+  width: 50%;
+  transform: translateX(0);
+  transition: transform 0.6s ease-in-out;
+}
+
+.auth-container .overlay-panel h2 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.auth-container .overlay-panel p {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin-bottom: 2rem;
+  opacity: 0.95;
+}
+
+.auth-container .overlay-left {
+  transform: translateX(-20%);
+}
+
+.auth-container.active .overlay-left {
+  transform: translateX(0);
+}
+
+.auth-container .overlay-right {
+  right: 0;
+  transform: translateX(0);
+}
+
+.auth-container.active .overlay-right {
+  transform: translateX(20%);
+}
+
+/* Ghost Button */
+.auth-container .ghost {
+  padding: 12px 35px;
+  background: transparent;
+  border: 2px solid white;
+  color: white;
+  border-radius: 25px;
+  cursor: pointer;
+  font-size: 0.9rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.auth-container .ghost:hover {
+  background: white;
+  color: var(--primary);
+  transform: scale(1.05);
+}
+
+.auth-container .ghost:active {
+  transform: scale(0.98);
+}
+
+/* Form Specific Styles */
+.auth-container .form-container .btn {
+  margin-top: 0.8rem; /* Reduced from 1rem */
+  width: 100%;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .auth-container {
+    width: 100%;
+    min-height: 600px;
+  }
+
+  .auth-container .form-container {
+    width: 100%;
+    padding: 40px 30px;
+  }
+
+  .auth-container .overlay-container {
+    display: none;
+  }
+
+  .auth-container .login-container,
+  .auth-container .register-container {
+    position: relative;
+    width: 100%;
+  }
+
+  .auth-container.active .login-container {
+    transform: translateX(0);
+    opacity: 0;
+    position: absolute;
+  }
+
+  .auth-container.active .register-container {
+    transform: translateX(0);
+    position: relative;
+  }
+}

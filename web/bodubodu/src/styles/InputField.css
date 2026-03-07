@@ -1,0 +1,51 @@
+.input-group {
+  position: relative;
+  margin-bottom: 0.1rem;
+}
+
+.input {
+  width: 100%;
+  padding: 1rem 0.9rem;
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  background: var(--card);
+  font-size: 1rem;
+  transition: 0.2s ease;
+}
+
+.input:focus {
+  outline: none;
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(180, 83, 9, 0.12);
+}
+
+.input.error {
+  border-color: var(--danger);
+}
+
+label {
+  position: absolute;
+  left: 0.9rem;
+  top: 1rem;
+  color: var(--text-muted);
+  pointer-events: none;
+  transition: 0.2s ease;
+  background: var(--card);
+  padding: 0 4px;
+}
+
+.input:focus + label,
+label.floating {
+  top: -0.6rem;
+  font-size: 0.75rem;
+  color: var(--primary);
+}
+
+.input-error-container {
+  height: 18px;
+}
+
+.input-error {
+  font-size: 0.75rem;
+  color: var(--danger);
+}
