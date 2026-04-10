@@ -1,0 +1,64 @@
+# =============================================
+# BoduBodu monorepo — .gitignore
+# Covers: Android (mobile/), Spring Boot (backend/), Web (web/)
+# =============================================
+
+# ── ANDROID / MOBILE ──────────────────────────────
+mobile/.gradle/
+mobile/local.properties
+mobile/*.iml
+mobile/.idea/
+mobile/app/build/
+mobile/build/
+mobile/captures/
+mobile/.externalNativeBuild/
+mobile/.cxx/
+mobile/keystore/
+*.jks
+*.keystore
+
+# ── SPRING BOOT / BACKEND ─────────────────────────
+backend/target/
+backend/.mvn/wrapper/maven-wrapper.jar
+backend/.idea/
+backend/*.iml
+backend/HELP.md
+
+# application secrets — NEVER commit these
+backend/src/main/resources/application-local.properties
+backend/src/main/resources/application-prod.properties
+*.env
+.env
+.env.*
+application.properties.bak
+
+# ── WEB ───────────────────────────────────────────
+web/node_modules/
+web/.next/
+web/dist/
+web/build/
+web/.env
+web/.env.local
+web/.env.development.local
+web/.env.test.local
+web/.env.production.local
+web/npm-debug.log*
+web/yarn-debug.log*
+web/yarn-error.log*
+
+# ── COMMON / IDE ──────────────────────────────────
+.DS_Store
+Thumbs.db
+*.class
+*.log
+*.swp
+*.swo
+.vscode/settings.json
+.idea/
+*.iml
+out/
+bin/
+
+# ── JAVA / KOTLIN ─────────────────────────────────
+hs_err_pid*
+replay_pid*
