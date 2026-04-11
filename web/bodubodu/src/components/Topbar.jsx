@@ -1,24 +1,27 @@
-import { useNavigate } from "react-router-dom";
-
 function Topbar() {
-  const navigate = useNavigate();
-
-//   const logout = () => {
-//     localStorage.removeItem("user");
-//     navigate("/login");
-//   };
-
   const user = JSON.parse(localStorage.getItem("user"));
+
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 17) return "Good afternoon";
+    return "Good evening";
+  };
+
+  const getFormattedDate = () => {
+    return new Date().toLocaleDateString("en-US", {
+      weekday: "long",
+      month: "long",
+      day: "numeric",
+    });
+  };
 
   return (
     <div className="topbar">
-      <div>
-        <h3>Welcome, {user?.firstName}</h3>
+      <div className="topbar-left">
+        <h3>{getGreeting()}, {user?.firstName} 👋</h3>
+        <p>{getFormattedDate()} · Let's push your limits today.</p>
       </div>
-
-      {/* <button className="logout-btn" onClick={logout}>
-        Logout
-      </button> */}
     </div>
   );
 }

@@ -34,6 +34,9 @@ public class UserEntity {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    @Column(nullable = false)
+    private String role;
+
     public UserEntity() {}
 
     @PrePersist
@@ -83,5 +86,13 @@ public class UserEntity {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public String getRole() {
+    return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }

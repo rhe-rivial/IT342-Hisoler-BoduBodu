@@ -93,7 +93,13 @@ function AuthContainer() {
       }
 
       const data = await response.json();
-      localStorage.setItem("user", JSON.stringify(data));
+      // Save token separately
+      localStorage.setItem("token", data.token);
+
+      // OPTIONAL: decode user later OR fetch profile
+      localStorage.setItem("user", JSON.stringify({
+        email: loginEmail
+      }));
 
       setNotification({
         type: "success",
