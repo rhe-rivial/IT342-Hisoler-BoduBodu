@@ -92,14 +92,44 @@ function AuthContainer() {
         throw new Error("Login failed. Please try again.");
       }
 
-      const data = await response.json();
-      // Save token separately
-      localStorage.setItem("token", data.token);
+      const data = await response.json(); // Backend returns { token: "..." }
+      const token = data.token;
+      // Save token
+      localStorage.setItem("token", token);
 
-      // OPTIONAL: decode user later OR fetch profile
-      localStorage.setItem("user", JSON.stringify({
-        email: loginEmail
-      }));
+      // Fetch user profile using the token
+      try {
+        const profileResponse = await fetch(`${API_BASE}/user/me`, {
+          method: "GET",
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (profileResponse.ok) {
+          const userProfile = await profileResponse.json();
+          localStorage.setItem("user", JSON.stringify({
+            email: userProfile.email,
+            firstName: userProfile.firstName,
+            lastName: userProfile.lastName,
+            userId: userProfile.userId
+          }));
+        } else {
+          // Fallback if profile fetch fails
+          localStorage.setItem("user", JSON.stringify({
+            email: loginEmail,
+            firstName: "User"
+          }));
+        }
+      } catch (profileError) {
+        console.warn("Could not fetch user profile:", profileError);
+        // Fallback if profile endpoint doesn't exist
+        localStorage.setItem("user", JSON.stringify({
+          email: loginEmail,
+          firstName: "User"
+        }));
+      }
 
       setNotification({
         type: "success",

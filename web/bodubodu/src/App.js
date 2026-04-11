@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 
 import AuthContainer from "./components/AuthContainer";
 import DashboardLayout from "./components/DashboardLayout";
+import CustomWorkouts from "./components/CustomWorkouts";
 
 // Temporary placeholder pages 
 const DashboardHome = () => <div><h2>Dashboard Overview</h2></div>;
@@ -57,7 +58,7 @@ function App() {
           <Route path="/dashboard" element={<DashboardHome />} />
           <Route path="/workouts" element={<Workouts />} />
           <Route path="/exercise-library" element={<ExerciseLibrary />} />
-          <Route path="/workout-plans" element={<WorkoutPlans />} />
+          <Route path="/workout-plans" element={<CustomWorkouts />} />
           <Route path="/progress" element={<Progress />} />
         </Route>
 

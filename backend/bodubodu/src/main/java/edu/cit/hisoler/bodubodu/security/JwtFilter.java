@@ -28,6 +28,14 @@ public class JwtFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
+        String path = request.getRequestURI();
+
+        // ✅ SKIP JWT for public endpoints
+        if (path.startsWith("/api/v1/exercises") || path.startsWith("/api/auth")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String header = request.getHeader("Authorization");
 
         if (header != null && header.startsWith("Bearer ")) {
@@ -35,8 +43,6 @@ public class JwtFilter extends OncePerRequestFilter {
 
             if (jwtService.isValid(token)) {
                 String email = jwtService.extractEmail(token);
-
-                // 🔥 Extract role from token
                 String role = jwtService.extractRole(token);
 
                 UsernamePasswordAuthenticationToken auth =

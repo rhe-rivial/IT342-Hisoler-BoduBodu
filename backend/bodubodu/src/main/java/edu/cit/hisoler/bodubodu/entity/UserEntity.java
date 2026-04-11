@@ -1,9 +1,6 @@
 package edu.cit.hisoler.bodubodu.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-
 import java.time.LocalDateTime;
 
 @Entity
@@ -14,85 +11,39 @@ public class UserEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "First name is required")
-    @Column(nullable = false)
-    private String firstName;
+    @Column(name = "first_name")
+    private String firstname;
 
-    @NotBlank(message = "Last name is required")
-    @Column(nullable = false)
-    private String lastName;
+    @Column(name = "last_name")
+    private String lastname;
 
-    @NotBlank(message = "Email is required")
-    @Email(message = "Invalid email format")
-    @Column(nullable = false, unique = true)
+    @Column(unique = true, nullable = false)
     private String email;
 
-    @NotBlank(message = "Password is required")
-    @Column(nullable = false)
     private String password;
-
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt;
-
-    @Column(nullable = false)
     private String role;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    public UserEntity() {}
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
-    }
-
-    // =====================
     // GETTERS AND SETTERS
-    // =====================
 
-    public Long getId() {
-        return id;
-    }
+    public Long getUserId()               { return id; }
+    public void setUserId(Long userId)    { this.id = userId; }
 
-    public String getFirstName() {
-        return firstName;
-    }
+    public String getFirstName()              { return firstname; }
+    public void setFirstName(String firstname){ this.firstname = firstname; }
 
-    public void setFirstName(String firstName) {
-        this.firstName = firstName;
-    }
+    public String getLastName()               { return lastname; }
+    public void setLastName(String lastname)  { this.lastname = lastname; }
 
-    public String getLastName() {
-        return lastName;
-    }
+    public String getEmail()              { return email; }
+    public void setEmail(String email)    { this.email = email; }
 
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
+    public String getPassword()           { return password; }
+    public void setPassword(String pw)    { this.password = pw; }
 
-    public String getEmail() {
-        return email;
-    }
+    public String getRole()               { return role; }
+    public void setRole(String role)      { this.role = role; }
 
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public String getRole() {
-    return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
-    }
+    public LocalDateTime getCreatedAt()              { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt){ this.createdAt = createdAt; }
 }
