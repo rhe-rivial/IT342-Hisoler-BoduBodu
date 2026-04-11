@@ -1,5 +1,15 @@
+import { useEffect, useState } from "react";
+
 function Topbar() {
-  const user = JSON.parse(localStorage.getItem("user"));
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
 
   const getGreeting = () => {
     const hour = new Date().getHours();
@@ -19,7 +29,9 @@ function Topbar() {
   return (
     <div className="topbar">
       <div className="topbar-left">
-        <h3>{getGreeting()}, {user?.firstName} 👋</h3>
+        <h3>
+          {getGreeting()}, {user?.firstName} 👋
+        </h3>
         <p>{getFormattedDate()} · Let's push your limits today.</p>
       </div>
     </div>
