@@ -4,6 +4,9 @@ import edu.cit.hisoler.bodubodu.dto.LoginRequest;
 import edu.cit.hisoler.bodubodu.dto.RegisterRequest;
 import edu.cit.hisoler.bodubodu.service.AuthService;
 import jakarta.validation.Valid;
+
+import java.util.Map;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +39,8 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
-            return ResponseEntity.ok(authService.login(request));
+            String token = authService.login(request);
+            return ResponseEntity.ok(Map.of("token", token));
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body("Incorrect email or password.");
         }
