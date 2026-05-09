@@ -1,10 +1,10 @@
 import { useState } from "react";
-import Button from "./Button";
-import "../styles/Register.css";
+import Button from "../../components/Button";
+import "../styles/Login.css";
 
-function Register() {
 
-  const [name, setName] = useState("");
+function Login() {
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -13,17 +13,7 @@ function Register() {
 
       <div className="card auth-card">
 
-        <h2 className="auth-title">Create Account</h2>
-
-        <div className="form-group">
-          <label>Full Name</label>
-          <input
-            type="text"
-            placeholder="Enter your full name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-        </div>
+        <h2 className="auth-title">Welcome Back</h2>
 
         <div className="form-group">
           <label>Email</label>
@@ -39,16 +29,16 @@ function Register() {
           <label>Password</label>
           <input
             type="password"
-            placeholder="Create a password"
+            placeholder="Enter your password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
 
-        <Button>Create Account</Button>
+        <Button>Login</Button>
 
         <p className="auth-switch">
-          Already have an account? Login
+          Don’t have an account? Register
         </p>
 
       </div>
@@ -56,4 +46,4 @@ function Register() {
   );
 }
 
-export default Register;
+export default Login;
