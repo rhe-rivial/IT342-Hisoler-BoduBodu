@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import InputField from "./InputField";
-import Notification from "./Notification";
-import Button from "./Button";
-import "../styles/AuthContainer.css";
+import InputField from "../../shared/components/InputField";
+import Notification from "../../shared/components/Notification";
+import Button from "../../shared/components/Button";
+import "./AuthContainer.css";
 
 function AuthContainer() {
   const location = useLocation();
@@ -113,13 +113,15 @@ function AuthContainer() {
             email: userProfile.email,
             firstName: userProfile.firstName,
             lastName: userProfile.lastName,
-            userId: userProfile.userId
+            userId: userProfile.userId,
+            role: userProfile.role  // ← required for admin checks everywhere
           }));
         } else {
           // Fallback if profile fetch fails
           localStorage.setItem("user", JSON.stringify({
             email: loginEmail,
-            firstName: "User"
+            firstName: "User",
+            role: ""
           }));
         }
       } catch (profileError) {
@@ -127,7 +129,8 @@ function AuthContainer() {
         // Fallback if profile endpoint doesn't exist
         localStorage.setItem("user", JSON.stringify({
           email: loginEmail,
-          firstName: "User"
+          firstName: "User",
+          role: ""
         }));
       }
 

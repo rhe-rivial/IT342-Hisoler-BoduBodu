@@ -3,9 +3,45 @@ import { useState } from "react";
 import ConfirmModal from "./ConfirmModal";
 import "../styles/Sidebar.css";
 
+/** Extract role from JWT payload without a library */
+function getRoleFromToken(token) {
+  try {
+    const payload = JSON.parse(atob(token.split(".")[1]));
+    // Common JWT claim names for role
+    return (
+      payload.role ||
+      payload.roles ||
+      payload.authorities ||
+      payload["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"] ||
+      ""
+    );
+  } catch {
+    return "";
+  }
+}
+
+function isAdminRole(role) {
+  if (!role) return false;
+  const r = Array.isArray(role) ? role.join(",") : String(role);
+  return r.toUpperCase().includes("ADMIN");
+}
+
 function Sidebar() {
   const navigate = useNavigate();
   const [showLogoutModal, setShowLogoutModal] = useState(false);
+
+  // Primary source: stored user object (set by Dashboard on login)
+  const storedUser = localStorage.getItem("user");
+  const user = storedUser ? JSON.parse(storedUser) : null;
+
+  // Fallback: decode the JWT so the Admin link shows immediately after login
+  // even if the /api/user/me fetch hasn't completed yet.
+  const token = localStorage.getItem("token") || "";
+  const tokenRole = token ? getRoleFromToken(token) : "";
+
+  const isAdmin =
+    isAdminRole(user?.role) ||
+    isAdminRole(tokenRole);
 
   const handleLogoutConfirm = () => {
     localStorage.removeItem("user");
@@ -85,9 +121,27 @@ function Sidebar() {
           </NavLink>
         </nav>
 
+        {/* Admin section — visible when role contains "ADMIN" */}
+        {isAdmin && (
+          <>
+            <span className="nav-section-label">Admin</span>
+            <nav className="nav-links">
+              <NavLink to="/admin/users">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                  <circle cx="9" cy="7" r="4" />
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+                </svg>
+                User Management
+              </NavLink>
+            </nav>
+          </>
+        )}
+
       </div>
 
-      {/* Logout only — no user info */}
+      {/* Logout */}
       <div className="sidebar-bottom">
         <button
           className="logout-btn-sidebar"
