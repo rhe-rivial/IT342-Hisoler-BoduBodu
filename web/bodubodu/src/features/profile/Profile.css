@@ -1,0 +1,392 @@
+/* ── Profile Page ─────────────────────────────────────────────── */
+.pf-page {
+  padding: 2rem;
+  max-width: 900px;
+  position: relative;
+}
+
+.pf-header {
+  margin-bottom: 1.75rem;
+}
+
+.pf-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin: 0;
+}
+
+/* ── Two-column grid ──────────────────────────────────────────── */
+.pf-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.25rem;
+  align-items: start;
+}
+
+@media (max-width: 700px) {
+  .pf-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ── Card ─────────────────────────────────────────────────────── */
+.pf-card {
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius);
+  padding: 1.5rem;
+  box-shadow: var(--shadow-sm);
+}
+
+.pf-right {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+}
+
+.pf-card-heading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--text-main);
+  margin-bottom: 1.25rem;
+}
+
+.pf-card-heading svg {
+  stroke: var(--text-muted);
+}
+
+/* ── Info rows ────────────────────────────────────────────────── */
+.pf-info-row {
+  display: flex;
+  align-items: center;
+  gap: 0.875rem;
+  padding: 0.6rem 0;
+}
+
+.pf-info-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: var(--primary-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.pf-info-icon svg {
+  stroke: var(--primary);
+}
+
+.pf-info-body {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  flex: 1;
+  min-width: 0;
+}
+
+.pf-info-label {
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.pf-info-value {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-main);
+}
+
+.pf-inline-input {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-main);
+  border: none;
+  background: transparent;
+  outline: none;
+  padding: 0;
+  font-family: inherit;
+  width: 100%;
+  transition: var(--transition);
+  border-bottom: 1.5px solid transparent;
+}
+
+.pf-inline-input:focus {
+  border-bottom-color: var(--primary);
+}
+
+/* ── Divider ──────────────────────────────────────────────────── */
+.pf-divider {
+  height: 1px;
+  background: var(--card-border);
+  margin: 0.25rem 0;
+}
+
+/* ── Password ─────────────────────────────────────────────────── */
+.pf-pw-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.pf-pw-label {
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.07em;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+.pf-pw-change-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0;
+  transition: var(--transition);
+}
+
+.pf-pw-change-btn:hover {
+  color: var(--primary-dark);
+}
+
+.pf-pw-dots-row {
+  margin-bottom: 0.25rem;
+}
+
+.pf-pw-dots {
+  background: var(--surface);
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+  width: 100%;
+  outline: none;
+  font-family: inherit;
+  letter-spacing: 0.15em;
+  cursor: default;
+}
+
+.pf-pw-hint {
+  font-size: 0.73rem;
+  color: var(--text-hint);
+  margin: 0.25rem 0 1rem;
+}
+
+.pf-pw-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+}
+
+.pf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.pf-field-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+}
+
+.pf-input {
+  padding: 0.6rem 0.875rem;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  font-size: 0.875rem;
+  color: var(--text-main);
+  font-family: inherit;
+  outline: none;
+  transition: var(--transition);
+}
+
+.pf-input:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.pf-cancel-pw-btn {
+  align-self: flex-start;
+  background: none;
+  border: 1px solid var(--card-border);
+  border-radius: var(--radius-sm);
+  padding: 0.4rem 0.875rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: var(--transition);
+  margin-top: 0.25rem;
+}
+
+.pf-cancel-pw-btn:hover {
+  background: var(--surface);
+  color: var(--text-main);
+}
+
+/* ── Save button ──────────────────────────────────────────────── */
+.pf-save-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  background: var(--primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 0.8rem 1rem;
+  font-size: 0.9rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  margin-top: 1.25rem;
+  transition: var(--transition);
+}
+
+.pf-save-btn:hover:not(:disabled) {
+  background: var(--primary-dark);
+  transform: translateY(-1px);
+}
+
+.pf-save-btn:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+.pf-save-btn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.pf-btn-spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: pfSpin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes pfSpin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Fitness summary ──────────────────────────────────────────── */
+.pf-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+}
+
+.pf-summary-stat {
+  background: var(--primary-light);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.pf-summary-val {
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: var(--primary);
+  line-height: 1;
+}
+
+.pf-summary-unit {
+  font-size: 1.1rem;
+}
+
+.pf-summary-label {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+/* ── History link ─────────────────────────────────────────────── */
+.pf-history-link {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.4rem;
+  background: none;
+  border: none;
+  color: var(--primary);
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: inherit;
+  padding: 0.5rem 0 0;
+  transition: var(--transition);
+}
+
+.pf-history-link:hover {
+  color: var(--primary-dark);
+  gap: 0.6rem;
+}
+
+/* ── Toast ────────────────────────────────────────────────────── */
+.pf-toast {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.75rem 1.25rem;
+  border-radius: var(--radius-sm);
+  font-size: 0.875rem;
+  font-weight: 500;
+  box-shadow: var(--shadow-md);
+  z-index: 999;
+  animation: pfToastIn 0.25s ease;
+}
+
+@keyframes pfToastIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.pf-toast-success {
+  background: #f0fdf4;
+  color: #16a34a;
+  border: 1px solid #bbf7d0;
+}
+
+.pf-toast-error {
+  background: #fff1f2;
+  color: #dc2626;
+  border: 1px solid #fecdd3;
+}
+
+/* ── Loading ──────────────────────────────────────────────────── */
+.pf-loading {
+  display: flex;
+  justify-content: center;
+  padding: 4rem;
+}
