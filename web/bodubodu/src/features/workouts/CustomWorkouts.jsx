@@ -15,6 +15,13 @@ function authHeaders() {
   };
 }
 
+function diffClass(level = "") {
+  const l = level.toLowerCase();
+  if (l.includes("adv")) return "diff-advanced";
+  if (l.includes("int")) return "diff-intermediate";
+  return "diff-beginner";
+}
+
 // ─── NOTIFICATION ─────────────────────────────────────────────────
 function Notification({ message, type, onClose }) {
   useEffect(() => {
@@ -63,28 +70,28 @@ function ConfirmModal({ title, message, confirmText = 'Delete', onConfirm, onCan
 
 // ─── BUILD MODAL ──────────────────────────────────────────────────
 function BuildModal({ exercises, editData, onSave, onClose }) {
-  const [name, setName]         = useState(editData ? editData.name : '');
-  const [nameErr, setNameErr]   = useState('');
-  const [exSearch, setExSearch] = useState('');
-  const [selected, setSelected] = useState(
+  const [name,      setName]      = useState(editData?.name || "");
+  const [nameErr,   setNameErr]   = useState("");
+  const [exSearch,  setExSearch]  = useState("");
+  const [selected,  setSelected]  = useState(
     editData
-      ? editData.exercises.map(e => ({
+      ? (editData.exercises || []).map(e => ({
           exerciseId:   e.exerciseId,
           name:         e.exerciseName || e.name || `Exercise ${e.exerciseId}`,
-          sets:         e.sets,
-          repetitions:  e.repetitions,
-          restInterval: e.restInterval,
+          sets:         e.sets         || 3,
+          repetitions:  e.repetitions  || 10,
+          restInterval: e.restInterval || 30,
         }))
       : []
   );
-  const [selErr, setSelErr]   = useState('');
-  const [saving, setSaving]   = useState(false);
-
-  const filteredExercises = exercises.filter(e =>
+  const [selErr,  setSelErr]  = useState("");
+  const [saving,  setSaving]  = useState(false);
+ 
+  const filteredEx = exercises.filter(e =>
     e.name.toLowerCase().includes(exSearch.toLowerCase()) ||
-    (e.targetMuscleGroup || '').toLowerCase().includes(exSearch.toLowerCase())
+    (e.targetMuscleGroup || "").toLowerCase().includes(exSearch.toLowerCase())
   );
-
+ 
   function toggleExercise(ex) {
     const id = ex.exerciseId || ex.id;
     setSelected(prev => {
@@ -92,96 +99,96 @@ function BuildModal({ exercises, editData, onSave, onClose }) {
       if (exists !== -1) return prev.filter(s => s.exerciseId !== id);
       return [...prev, { exerciseId: id, name: ex.name, sets: 3, repetitions: 10, restInterval: 30 }];
     });
-    setSelErr('');
+    setSelErr("");
   }
-
+ 
   const FIELD_MAX = { sets: 8, repetitions: 100, restInterval: 420 };
   const FIELD_MIN = { sets: 1, repetitions: 1,   restInterval: 0   };
-
+ 
   function updateField(i, field, value) {
-    const raw = value === '' ? '' : Number(value);
+    const raw = value === "" ? "" : Number(value);
     setSelected(prev => {
       const next = [...prev];
-      if (field === 'sets') return next.map(ex => ({ ...ex, sets: raw }));
       next[i] = { ...next[i], [field]: raw };
       return next;
     });
   }
-
+ 
   function clampField(i, field, value) {
-    const raw = Number(value) || 0;
+    const raw     = Number(value) || 0;
     const clamped = Math.min(FIELD_MAX[field] ?? Infinity, Math.max(FIELD_MIN[field] ?? 0, raw));
     setSelected(prev => {
       const next = [...prev];
-      if (field === 'sets') return next.map(ex => ({ ...ex, sets: clamped }));
       next[i] = { ...next[i], [field]: clamped };
       return next;
     });
   }
-
+ 
   function moveSelected(i, dir) {
     setSelected(prev => {
-      const next = [...prev];
+      const next    = [...prev];
       const swapIdx = i + dir;
       if (swapIdx < 0 || swapIdx >= next.length) return prev;
       [next[i], next[swapIdx]] = [next[swapIdx], next[i]];
       return next;
     });
   }
-
+ 
   async function handleSave() {
-    setNameErr(''); setSelErr('');
+    setNameErr(""); setSelErr("");
     let ok = true;
-    if (!name.trim())             { setNameErr('Workout name is required.'); ok = false; }
-    if (name.trim().length > 100) { setNameErr('Name must be under 100 characters.'); ok = false; }
-    if (selected.length === 0)    { setSelErr('Select at least one exercise.'); ok = false; }
-    const rowOk = selected.every(s => s.sets >= 1 && s.repetitions >= 1 && s.restInterval >= 0);
-    if (!rowOk) { setSelErr('Sets/Reps must be ≥ 1 and Rest must be ≥ 0.'); ok = false; }
+    if (!name.trim())          { setNameErr("Workout name is required."); ok = false; }
+    if (selected.length === 0) { setSelErr("Select at least one exercise."); ok = false; }
     if (!ok) return;
     setSaving(true);
     await onSave({
       name: name.trim(),
       exercises: selected.map(s => ({
         exerciseId:   s.exerciseId,
-        sets:         s.sets,
-        repetitions:  s.repetitions,
-        restInterval: s.restInterval,
+        sets:         s.sets         || 3,
+        repetitions:  s.repetitions  || 10,
+        restInterval: s.restInterval || 30,
       })),
     });
     setSaving(false);
   }
-
+ 
   return (
     <div className="ap-overlay" onClick={onClose}>
       <div className="ap-modal ap-modal--wide" onClick={e => e.stopPropagation()}>
+ 
+        {/* Header — matches DefaultWorkouts exactly */}
         <div className="ap-modal__header">
           <div className="ap-modal__header-left">
             <div className="ap-modal__icon">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                <path d="M18.5 2.5l3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                <path d="M6 4v6a6 6 0 0 0 12 0V4" /><line x1="4" y1="20" x2="20" y2="20" />
               </svg>
             </div>
-            <h2>{editData ? 'Edit Routine' : 'Build your Routine'}</h2>
+            <h2>{editData ? "Edit Routine" : "Build your Routine"}</h2>
           </div>
           <button className="ap-modal__close" onClick={onClose}>✕</button>
         </div>
-
+ 
         <div className="ap-modal__body">
-          {/* Workout Name */}
+ 
+          {/* Workout Name — same single-column row as DefaultWorkouts */}
           <div className="ap-form-row">
             <label className="ap-label">Workout Name <span className="ap-req">*</span></label>
             <input
-              className={`ap-input${nameErr ? ' ap-input--err' : ''}`}
+              className={`ap-input${nameErr ? " ap-input--err" : ""}`}
               placeholder="e.g. Morning Strength"
               value={name}
-              onChange={e => { setName(e.target.value); setNameErr(''); }}
+              autoComplete="off"
+              onChange={e => { setName(e.target.value); setNameErr(""); }}
             />
             {nameErr && <span className="ap-field-err">{nameErr}</span>}
           </div>
-
-          {/* Exercise Picker */}
+ 
+          {/* Exercise builder — identical structure to DefaultWorkouts */}
           <div className="ap-workout-builder">
+ 
+            {/* Left: browse */}
             <div className="ap-ex-picker">
               <div className="ap-section-label">Browse Exercises</div>
               <div className="ap-ex-search">
@@ -195,13 +202,13 @@ function BuildModal({ exercises, editData, onSave, onClose }) {
                 />
               </div>
               <div className="ap-ex-list">
-                {filteredExercises.map(ex => {
-                  const id = ex.exerciseId || ex.id;
+                {filteredEx.map(ex => {
+                  const id    = ex.exerciseId || ex.id;
                   const isSel = selected.some(s => s.exerciseId === id);
                   return (
                     <div
                       key={id}
-                      className={`ap-ex-item${isSel ? ' ap-ex-item--selected' : ''}`}
+                      className={`ap-ex-item${isSel ? " ap-ex-item--selected" : ""}`}
                       onClick={() => toggleExercise(ex)}
                     >
                       <div className="ap-ex-item__check">
@@ -212,68 +219,107 @@ function BuildModal({ exercises, editData, onSave, onClose }) {
                         )}
                       </div>
                       <div className="ap-ex-item__info">
-                        <div className="ap-ex-item__name">{ex.name}</div>
-                        <div className="ap-ex-item__muscle">{ex.targetMuscleGroup || ''}</div>
+                        <span className="ap-ex-item__name">{ex.name}</span>
+                        <span className={`ap-diff ${diffClass(ex.difficultyLevel)}`}>
+                          {ex.difficultyLevel || "Beginner"}
+                        </span>
                       </div>
+                      <span className="ap-ex-item__muscle">{ex.targetMuscleGroup || ""}</span>
                     </div>
                   );
                 })}
               </div>
             </div>
-
-            {/* Selected exercises config */}
-            <div className="ap-ex-config">
+ 
+            {/* Right: selected config — same classes as DefaultWorkouts */}
+            <div className="ap-sel-config">
               <div className="ap-section-label">
-                Configure Exercises
+                Selected Exercises
                 {selErr && <span className="ap-field-err" style={{ marginLeft: 8 }}>{selErr}</span>}
               </div>
-
+ 
               {selected.length === 0 ? (
-                <div className="ap-ex-config__empty">
+                <div className="ap-sel-empty">
                   <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                    <circle cx="12" cy="12" r="10" /><path d="M12 8v4m0 4h.01" />
+                    <path d="M12 5v14M5 12h14" />
                   </svg>
-                  <p>Select exercises from the left</p>
+                  <p>Click exercises on the left to add them</p>
                 </div>
               ) : (
-                <>
-                  <div className="ap-sel-header">
-                    <span style={{ flex: 2 }}>Exercise</span>
-                    <span className="ap-sel-col">Sets<small>max 8</small></span>
-                    <span className="ap-sel-col">Reps<small>max 100</small></span>
-                    <span className="ap-sel-col">Rest(s)<small>max 420</small></span>
-                    <span style={{ width: 28 }} />
+                <div className="ap-sel-rows">
+                  <div className="ap-sel-header-row">
+                    <span style={{ width: 48 }} />
+                    <span>Exercise</span>
+                    <span>Sets</span>
+                    <span>Reps</span>
+                    <span>Rest (s)</span>
+                    <span />
                   </div>
                   {selected.map((s, i) => (
                     <div key={i} className="ap-sel-row">
+                      {/* Reorder controls — unique to CustomWorkouts, kept */}
                       <div className="ap-sel-row__order">
-                        <button className="ap-order-btn" onClick={() => moveSelected(i, -1)} disabled={i === 0}>▲</button>
+                        <button
+                          className="ap-order-btn"
+                          onClick={() => moveSelected(i, -1)}
+                          disabled={i === 0}
+                          title="Move up"
+                        >▲</button>
                         <span>{i + 1}</span>
-                        <button className="ap-order-btn" onClick={() => moveSelected(i, 1)} disabled={i === selected.length - 1}>▼</button>
+                        <button
+                          className="ap-order-btn"
+                          onClick={() => moveSelected(i, 1)}
+                          disabled={i === selected.length - 1}
+                          title="Move down"
+                        >▼</button>
                       </div>
-                      <div className="ap-sel-row__name" style={{ flex: 2 }}>{s.name}</div>
-                      <input type="number" min="1" max="8"   className="ap-sel-input" value={s.sets}         onChange={e => updateField(i,'sets',e.target.value)}         onBlur={e => clampField(i,'sets',e.target.value)} />
-                      <input type="number" min="1" max="100" className="ap-sel-input" value={s.repetitions}  onChange={e => updateField(i,'repetitions',e.target.value)}  onBlur={e => clampField(i,'repetitions',e.target.value)} />
-                      <input type="number" min="0" max="420" className="ap-sel-input" value={s.restInterval} onChange={e => updateField(i,'restInterval',e.target.value)} onBlur={e => clampField(i,'restInterval',e.target.value)} />
-                      <button className="ap-remove-btn" onClick={() => setSelected(prev => prev.filter((_,idx) => idx !== i))}>✕</button>
+                      <span className="ap-sel-row__name">{s.name}</span>
+                      <input
+                        type="number" min="1" max="8"
+                        className="ap-sel-input"
+                        value={s.sets}
+                        onChange={e => updateField(i, "sets", e.target.value)}
+                        onBlur={e  => clampField(i, "sets", e.target.value)}
+                      />
+                      <input
+                        type="number" min="1" max="100"
+                        className="ap-sel-input"
+                        value={s.repetitions}
+                        onChange={e => updateField(i, "repetitions", e.target.value)}
+                        onBlur={e  => clampField(i, "repetitions", e.target.value)}
+                      />
+                      <input
+                        type="number" min="0" max="420"
+                        className="ap-sel-input"
+                        value={s.restInterval}
+                        onChange={e => updateField(i, "restInterval", e.target.value)}
+                        onBlur={e  => clampField(i, "restInterval", e.target.value)}
+                      />
+                      <button
+                        className="ap-remove-btn"
+                        onClick={() => setSelected(prev => prev.filter((_, idx) => idx !== i))}
+                      >✕</button>
                     </div>
                   ))}
-                </>
+                </div>
               )}
             </div>
+ 
           </div>
         </div>
-
+ 
         <div className="ap-modal__footer">
           <button className="ap-btn ap-btn--outline" onClick={onClose}>Cancel</button>
           <button className="ap-btn ap-btn--primary" onClick={handleSave} disabled={saving}>
-            {saving ? 'Saving…' : editData ? 'Save Changes' : 'Save Workout'}
+            {saving ? "Saving…" : editData ? "Save Changes" : "Save Workout"}
           </button>
         </div>
+ 
       </div>
     </div>
   );
 }
+ 
 
 // ─── EXERCISE DURATION FROM REPS ──────────────────────────────────
 function durationFromReps(reps) {
@@ -353,37 +399,41 @@ function SessionModal({ workout, onClose }) {
     : (exList[exIdx + 1]?.exerciseName || exList[exIdx + 1]?.name || '');
 
   async function handleFinish() {
-    const duration = Math.round((Date.now() - startTime.current) / 1000);
+    const duration = Math.round((Date.now() - startTime.current) / 60000); // minutes
     try {
-      await fetch(`${BASE_URL}/api/user/sessions`, {
-        method: 'POST',
+      await fetch(`${BASE_URL}/api/dashboard/log-workout`, {
+        method: "POST",
         headers: authHeaders(),
-        body: JSON.stringify({ customWorkoutId: workout.customWorkoutId, completedAt: new Date().toISOString(), duration }),
+        body: JSON.stringify({
+          workoutName:      workout.name,
+          customWorkoutId:  workout.customWorkoutId,
+          defaultWorkoutId: null,
+          duration:         duration < 1 ? 1 : duration,
+          exercises:        (workout.exercises || []).length,
+          completedAt:      new Date().toISOString(),
+        }),
       });
-    } catch (_) {}
-    onClose(`Workout complete! (${Math.round(duration / 60)} min)`);
+    } catch {}
+    onClose(`Workout complete! (${duration < 1 ? 1 : duration} min)`);
   }
 
   return (
-    <div className="ap-overlay">
+    <div className="cw-overlay">
       <div className="cw-session-modal" onClick={e => e.stopPropagation()}>
-        <div className="ap-modal__header">
-          <div className="ap-modal__header-left">
-            <div className="ap-modal__icon">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <polygon points="5 3 19 12 5 21 5 3" />
-              </svg>
-            </div>
-            <div>
-              <div style={{ fontSize: '0.75rem', opacity: 0.6, marginBottom: 2 }}>Workout Session</div>
-              <h2 style={{ margin: 0 }}>{workout.name}</h2>
-            </div>
+
+        {/* Orange header — identical to DefaultWorkouts */}
+        <div className="cw-modal__header">
+          <div>
+            <div className="cw-session-subtitle">Workout Session</div>
+            <h2>{workout.name}</h2>
           </div>
-          <button className="ap-modal__close" onClick={() => onClose()}>✕</button>
+          <button className="cw-modal__close" onClick={() => onClose()}>✕</button>
         </div>
 
         <div className="cw-session-body">
-          <div className="cw-session-video"><span>Exercise Video</span></div>
+          <div className="cw-session-video">
+            <span>Exercise Video</span>
+          </div>
 
           <div className="cw-session-content">
             {phase === 'exercise' ? (
@@ -394,26 +444,28 @@ function SessionModal({ workout, onClose }) {
                 <div className="cw-timer-ring">
                   <svg viewBox="0 0 160 160" width="160" height="160">
                     <circle className="cw-circle-bg"   cx="80" cy="80" r="68" />
-                    <circle className="cw-circle-prog" cx="80" cy="80" r="68" strokeDasharray={CIRCUM} strokeDashoffset={offset} />
+                    <circle className="cw-circle-prog" cx="80" cy="80" r="68"
+                      strokeDasharray={CIRCUM} strokeDashoffset={offset} />
                   </svg>
                   <div className="cw-timer-text">
                     <span className="cw-timer-time">{mm}:{ss}</span>
                     <span className="cw-timer-lbl">seconds left</span>
                   </div>
                 </div>
-                <button className="ap-btn ap-btn--primary cw-session-done-btn" onClick={advancePhase}>
+                <button className="cw-btn cw-btn--primary cw-session-done-btn" onClick={advancePhase}>
                   {isLastEx && isLastSet ? 'Finish Workout ✓' : 'Done — Start Rest ▶'}
                 </button>
+                {/* Exercise nav controls — unique to CustomWorkouts */}
                 <div className="cw-nav-controls">
                   <div className="cw-nav-item">
-                    <button className="ap-btn ap-btn--outline cw-nav-btn" onClick={() => goToExercise(exIdx - 1)} disabled={exIdx === 0}>←</button>
+                    <button className="cw-btn cw-btn--outline cw-nav-btn" onClick={() => goToExercise(exIdx - 1)} disabled={exIdx === 0}>←</button>
                     <span className="cw-nav-label">{prevExName}</span>
                   </div>
                   <div className="cw-nav-center">
                     <div className="cw-session-progress">{exIdx + 1}/{exList.length} Exercise</div>
                   </div>
                   <div className="cw-nav-item">
-                    <button className="ap-btn ap-btn--outline cw-nav-btn" onClick={() => goToExercise(exIdx + 1)} disabled={isLastEx}>→</button>
+                    <button className="cw-btn cw-btn--outline cw-nav-btn" onClick={() => goToExercise(exIdx + 1)} disabled={isLastEx}>→</button>
                     <span className="cw-nav-label">{nextExName}</span>
                   </div>
                 </div>
@@ -431,23 +483,28 @@ function SessionModal({ workout, onClose }) {
                 <div className="cw-timer-ring">
                   <svg viewBox="0 0 160 160" width="160" height="160">
                     <circle className="cw-circle-bg"                  cx="80" cy="80" r="68" />
-                    <circle className="cw-circle-prog cw-circle-rest" cx="80" cy="80" r="68" strokeDasharray={CIRCUM} strokeDashoffset={offset} />
+                    <circle className="cw-circle-prog cw-circle-rest" cx="80" cy="80" r="68"
+                      strokeDasharray={CIRCUM} strokeDashoffset={offset} />
                   </svg>
                   <div className="cw-timer-text">
                     <span className="cw-timer-time cw-timer-time--rest">{mm}:{ss}</span>
                     <span className="cw-timer-lbl">rest left</span>
                   </div>
                 </div>
-                <button className="ap-btn ap-btn--outline cw-session-done-btn" onClick={advancePhase}>Skip Rest →</button>
+                <button className="cw-btn cw-btn--outline cw-session-done-btn" onClick={advancePhase}>
+                  Skip Rest →
+                </button>
               </>
             )}
           </div>
         </div>
 
-        <div className="ap-modal__footer">
-          <button className="ap-btn ap-btn--outline" onClick={() => onClose()}>Cancel</button>
-          <button className="ap-btn ap-btn--primary" onClick={handleFinish}>Finish &amp; Save</button>
+        {/* Green Finish & Save footer — identical to DefaultWorkouts */}
+        <div className="cw-session-footer">
+          <button className="cw-btn cw-btn--outline" onClick={() => onClose()}>Cancel</button>
+          <button className="cw-btn cw-btn--success" onClick={handleFinish}>Finish & Save</button>
         </div>
+
       </div>
     </div>
   );

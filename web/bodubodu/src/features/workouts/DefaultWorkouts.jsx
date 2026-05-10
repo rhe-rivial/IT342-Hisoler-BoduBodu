@@ -336,19 +336,22 @@ function SessionModal({ workout, onClose }) {
   const ss = String(safeSecs % 60).padStart(2, "0");
 
   async function handleFinish() {
-    const duration = Math.round((Date.now() - startTime.current) / 1000);
+    const duration = Math.round((Date.now() - startTime.current) / 60000); // minutes
     try {
-      await fetch(`${BASE_URL}/api/user/sessions`, {
+      await fetch(`${BASE_URL}/api/dashboard/log-workout`, {
         method: "POST",
         headers: authHeaders(),
         body: JSON.stringify({
+          workoutName:      workout.name,
           defaultWorkoutId: workout.defaultWorkoutId,
-          completedAt: new Date().toISOString(),
-          duration,
+          customWorkoutId:  null,
+          duration:         duration < 1 ? 1 : duration,
+          exercises:        (workout.exercises || []).length,
+          completedAt:      new Date().toISOString(),
         }),
       });
     } catch {}
-    onClose(`Workout complete! (${Math.round(duration / 60)} min)`);
+    onClose(`Workout complete! (${duration < 1 ? 1 : duration} min)`);
   }
 
   return (
