@@ -61,7 +61,7 @@ public class ExerciseController {
                     exercise.setDifficultyLevel(updatedExercise.getDifficultyLevel());
                     exercise.setTargetMuscleGroup(updatedExercise.getTargetMuscleGroup());
                     exercise.setVideo(updatedExercise.getVideo());
-                    exercise.setImage(updatedExercise.getImage());
+                    // exercise.setImage(updatedExercise.getImage());
 
                     exerciseRepo.save(exercise);
 

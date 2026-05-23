@@ -1,0 +1,9 @@
+{
+  "properties": [
+    {
+      "name": "google.client-id",
+      "type": "java.lang.String",
+      "description": "OAuth 2.0 web client ID used to verify Google Identity Services login tokens."
+    }
+  ]
+}

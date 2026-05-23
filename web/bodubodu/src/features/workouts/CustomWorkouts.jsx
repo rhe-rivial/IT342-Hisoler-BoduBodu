@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import "../admin/AdminPanel.css";
 import './CustomWorkouts.css';
 
@@ -86,6 +86,7 @@ function BuildModal({ exercises, editData, onSave, onClose }) {
   );
   const [selErr,  setSelErr]  = useState("");
   const [saving,  setSaving]  = useState(false);
+  const [dragIndex, setDragIndex] = useState(null);
  
   const filteredEx = exercises.filter(e =>
     e.name.toLowerCase().includes(exSearch.toLowerCase()) ||
@@ -124,14 +125,32 @@ function BuildModal({ exercises, editData, onSave, onClose }) {
     });
   }
  
-  function moveSelected(i, dir) {
+  function reorderSelected(from, to) {
+    if (from === null || Number.isNaN(from) || from === to) return;
     setSelected(prev => {
-      const next    = [...prev];
-      const swapIdx = i + dir;
-      if (swapIdx < 0 || swapIdx >= next.length) return prev;
-      [next[i], next[swapIdx]] = [next[swapIdx], next[i]];
+      if (from < 0 || to < 0 || from >= prev.length || to >= prev.length) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
       return next;
     });
+  }
+
+  function moveSelected(i, dir) {
+    reorderSelected(i, i + dir);
+  }
+
+  function handleDragStart(e, index) {
+    setDragIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(index));
+  }
+
+  function handleDrop(e, index) {
+    e.preventDefault();
+    const from = dragIndex ?? Number(e.dataTransfer.getData("text/plain"));
+    reorderSelected(from, index);
+    setDragIndex(null);
   }
  
   async function handleSave() {
@@ -174,7 +193,7 @@ function BuildModal({ exercises, editData, onSave, onClose }) {
  
           {/* Workout Name — same single-column row as DefaultWorkouts */}
           <div className="ap-form-row">
-            <label className="ap-label">Workout Name <span className="ap-req">*</span></label>
+            {/* <label className="ap-label">Workout Name <span className="ap-req">*</span></label> */}
             <input
               className={`ap-input${nameErr ? " ap-input--err" : ""}`}
               placeholder="e.g. Morning Strength"
@@ -246,9 +265,9 @@ function BuildModal({ exercises, editData, onSave, onClose }) {
                   <p>Click exercises on the left to add them</p>
                 </div>
               ) : (
-                <div className="ap-sel-rows">
-                  <div className="ap-sel-header-row">
-                    <span style={{ width: 48 }} />
+                <div className="ap-sel-rows ap-sel-rows--draggable">
+                  <div className="ap-sel-header-row ap-sel-header-row--draggable">
+                    <span></span>
                     <span>Exercise</span>
                     <span>Sets</span>
                     <span>Reps</span>
@@ -256,9 +275,28 @@ function BuildModal({ exercises, editData, onSave, onClose }) {
                     <span />
                   </div>
                   {selected.map((s, i) => (
-                    <div key={i} className="ap-sel-row">
+                    <div
+                      key={s.exerciseId}
+                      className={`ap-sel-row ap-sel-row--draggable${dragIndex === i ? " ap-sel-row--dragging" : ""}`}
+                      onDragOver={e => e.preventDefault()}
+                      onDrop={e => handleDrop(e, i)}
+                      onDragEnd={() => setDragIndex(null)}
+                    >
                       {/* Reorder controls — unique to CustomWorkouts, kept */}
-                      <div className="ap-sel-row__order">
+                      <button
+                        type="button"
+                        className="ap-drag-handle"
+                        draggable
+                        onDragStart={e => handleDragStart(e, i)}
+                        title="Drag to reorder"
+                      >
+                        <svg viewBox="0 0 16 16" aria-hidden="true">
+                          <circle cx="5" cy="4" r="1.2" /><circle cx="11" cy="4" r="1.2" />
+                          <circle cx="5" cy="8" r="1.2" /><circle cx="11" cy="8" r="1.2" />
+                          <circle cx="5" cy="12" r="1.2" /><circle cx="11" cy="12" r="1.2" />
+                        </svg>
+                      </button>
+                      <div className="ap-sel-row__order" style={{ display: "none" }}>
                         <button
                           className="ap-order-btn"
                           onClick={() => moveSelected(i, -1)}
@@ -516,6 +554,7 @@ export default function CustomWorkouts() {
   const [exercises,  setExercises]  = useState([]);
   const [loading,    setLoading]    = useState(true);
   const [search,     setSearch]     = useState('');
+  const [sortBy,     setSortBy]     = useState('date-made');
   const [showBuild,  setShowBuild]  = useState(false);
   const [editTarget, setEditTarget] = useState(null);
   const [session,    setSession]    = useState(null);
@@ -582,7 +621,19 @@ export default function CustomWorkouts() {
     await loadWorkouts();
   }
 
-  const filtered = workouts.filter(w => w.name.toLowerCase().includes(search.toLowerCase()));
+  const filtered = useMemo(() => (
+    workouts
+      .filter(w => w.name.toLowerCase().includes(search.toLowerCase()))
+      .sort((a, b) => {
+        if (sortBy === 'alphabetical') {
+          return (a.name || '').localeCompare(b.name || '', undefined, { sensitivity: 'base' });
+        }
+
+        const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return bTime - aTime;
+      })
+  ), [workouts, search, sortBy]);
 
   return (
     <div className="ap-page">
@@ -613,6 +664,20 @@ export default function CustomWorkouts() {
             value={search}
             onChange={e => setSearch(e.target.value)}
           />
+        </div>
+        <div className="ap-filters">
+          <button
+            className={`ap-filter-btn${sortBy === 'date-made' ? ' ap-filter-btn--active' : ''}`}
+            onClick={() => setSortBy('date-made')}
+          >
+            Date Made
+          </button>
+          <button
+            className={`ap-filter-btn${sortBy === 'alphabetical' ? ' ap-filter-btn--active' : ''}`}
+            onClick={() => setSortBy('alphabetical')}
+          >
+            Alphabetical
+          </button>
         </div>
       </div>
 

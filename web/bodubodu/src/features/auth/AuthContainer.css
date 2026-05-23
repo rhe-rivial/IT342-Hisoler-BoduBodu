@@ -83,6 +83,42 @@
   transition: transform 0.6s ease-in-out, opacity 0.3s ease-in-out 0.3s;
 }
 
+.auth-container .register-container {
+  padding-top: 26px;
+  padding-bottom: 26px;
+}
+
+.auth-container .register-container h2 {
+  margin-bottom: 0.9rem;
+}
+
+.auth-container .register-container .input {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+}
+
+.auth-container .register-container label {
+  top: 0.78rem;
+}
+
+.auth-container .register-container .input:focus + label,
+.auth-container .register-container label.floating {
+  top: -0.55rem;
+}
+
+.auth-container .register-container .input-error-container {
+  height: 12px;
+}
+
+.auth-container .register-container .btn {
+  min-height: 44px;
+  margin-top: 0.4rem;
+}
+
+.auth-container .register-container .auth-divider {
+  margin: 12px 0 10px;
+}
+
 /* Overlay Container */
 .auth-container .overlay-container {
   position: absolute;
@@ -192,6 +228,104 @@
   margin-top: 0.8rem; /* Reduced from 1rem */
   width: 100%;
 }
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 18px 0 14px;
+  color: #6b7280;
+  font-size: 0.85rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: #e5e7eb;
+}
+
+.google-auth-button {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  width: 100%;
+}
+
+.google-auth-render-target {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: visible;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+}
+
+.google-auth-render-target > div,
+.google-auth-render-target iframe {
+  display: block !important;
+  margin: 0 !important;
+}
+
+.google-fallback-button {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid #dadce0;
+  border-radius: 50%;
+  cursor: pointer;
+  padding: 0;
+  transition: background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.google-fallback-button:hover {
+  background: #f8fafd;
+  border-color: #d2e3fc;
+  box-shadow: 0 1px 2px rgba(60, 64, 67, 0.18);
+}
+
+.google-fallback-button svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+.google-icon-overlay {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border: 1px solid #dadce0;
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+}
+
+.google-icon-overlay svg {
+  width: 20px;
+  height: 20px;
+  flex: 0 0 auto;
+}
+
+
 
 /* Responsive */
 @media (max-width: 768px) {

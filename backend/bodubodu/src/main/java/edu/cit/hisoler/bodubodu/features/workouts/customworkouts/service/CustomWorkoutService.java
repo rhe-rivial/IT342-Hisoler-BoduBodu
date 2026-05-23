@@ -1,6 +1,5 @@
 package edu.cit.hisoler.bodubodu.features.workouts.customworkouts.service;
 
-import edu.cit.hisoler.bodubodu.features.exercises.entity.ExerciseEntity;
 import edu.cit.hisoler.bodubodu.features.exercises.repository.ExerciseRepository;
 import edu.cit.hisoler.bodubodu.features.user.entity.UserEntity;
 import edu.cit.hisoler.bodubodu.features.user.repository.UserRepository;
