@@ -7,6 +7,7 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import edu.cit.hisoler.bodubodu.features.auth.dto.GoogleAuthRequest;
 import edu.cit.hisoler.bodubodu.features.auth.dto.LoginRequest;
 import edu.cit.hisoler.bodubodu.features.auth.dto.RegisterRequest;
 
@@ -43,6 +44,16 @@ public class AuthController {
             return ResponseEntity.ok(Map.of("token", token));
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body("Incorrect email or password.");
+        }
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<?> googleAuth(@Valid @RequestBody GoogleAuthRequest request) {
+        try {
+            String token = authService.googleAuth(request);
+            return ResponseEntity.ok(Map.of("token", token));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(401).body(e.getMessage());
         }
     }
 }

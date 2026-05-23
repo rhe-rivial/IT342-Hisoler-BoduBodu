@@ -45,6 +45,8 @@ public class DefaultWorkoutService {
 
             map.put("defaultWorkoutId", w.getDefaultWorkoutId());
             map.put("name", w.getName());
+            map.put("description", w.getDescription());
+            map.put("difficultyLevel", normalizeDifficulty(w.getDifficultyLevel()));
             map.put("createdAt", w.getCreatedAt());
 
             List<DefaultWorkoutExerciseEntity> exList =
@@ -92,7 +94,11 @@ public class DefaultWorkoutService {
         DefaultWorkoutEntity workout =
                 new DefaultWorkoutEntity();
 
-        workout.setName(req.getName());
+        validateRequest(req);
+
+        workout.setName(req.getName().trim());
+        workout.setDescription(req.getDescription());
+        workout.setDifficultyLevel(normalizeDifficulty(req.getDifficultyLevel()));
         workout.setCreatedAt(LocalDateTime.now());
 
         DefaultWorkoutEntity saved =
@@ -133,7 +139,71 @@ public class DefaultWorkoutService {
                 saved.getDefaultWorkoutId());
 
         result.put("name", saved.getName());
+        result.put("description", saved.getDescription());
+        result.put("difficultyLevel", saved.getDifficultyLevel());
         result.put("createdAt", saved.getCreatedAt());
+        result.put("exercises", savedExercises);
+
+        return result;
+    }
+
+    // =====================================================
+    // UPDATE
+    // =====================================================
+
+    @Transactional
+    public Map<String, Object> updateWorkout(
+            Long id,
+            CreateWorkoutRequest req) {
+
+        DefaultWorkoutEntity workout = workoutRepo.findById(id)
+                .orElseThrow(() -> new RuntimeException("Default workout not found"));
+
+        validateRequest(req);
+
+        workout.setName(req.getName().trim());
+        workout.setDescription(req.getDescription());
+        workout.setDifficultyLevel(normalizeDifficulty(req.getDifficultyLevel()));
+        workoutRepo.save(workout);
+
+        workoutExRepo.deleteByDefaultWorkoutId(id);
+
+        List<Map<String, Object>> savedExercises =
+                new ArrayList<>();
+
+        for (CreateWorkoutRequest.ExerciseInput exInput
+                : req.getExercises()) {
+
+            DefaultWorkoutExerciseEntity ex =
+                    new DefaultWorkoutExerciseEntity();
+
+            ex.setDefaultWorkoutId(id);
+            ex.setExerciseId(exInput.getExerciseId());
+            ex.setSets(exInput.getSets());
+            ex.setRepetitions(exInput.getRepetitions());
+            ex.setRestInterval(exInput.getRestInterval());
+
+            workoutExRepo.save(ex);
+
+            Map<String, Object> exMap =
+                    new LinkedHashMap<>();
+
+            exMap.put("exerciseId", exInput.getExerciseId());
+            exMap.put("sets", exInput.getSets());
+            exMap.put("repetitions", exInput.getRepetitions());
+            exMap.put("restInterval", exInput.getRestInterval());
+
+            savedExercises.add(exMap);
+        }
+
+        Map<String, Object> result =
+                new LinkedHashMap<>();
+
+        result.put("defaultWorkoutId", workout.getDefaultWorkoutId());
+        result.put("name", workout.getName());
+        result.put("description", workout.getDescription());
+        result.put("difficultyLevel", workout.getDifficultyLevel());
+        result.put("createdAt", workout.getCreatedAt());
         result.put("exercises", savedExercises);
 
         return result;
@@ -149,5 +219,25 @@ public class DefaultWorkoutService {
         workoutExRepo.deleteByDefaultWorkoutId(id);
 
         workoutRepo.deleteById(id);
+    }
+
+    private void validateRequest(CreateWorkoutRequest req) {
+        if (req.getName() == null || req.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("Workout name is required");
+        }
+        if (req.getExercises() == null || req.getExercises().isEmpty()) {
+            throw new IllegalArgumentException("At least one exercise is required");
+        }
+        for (CreateWorkoutRequest.ExerciseInput ex : req.getExercises()) {
+            exerciseRepo.findById(ex.getExerciseId())
+                    .orElseThrow(() -> new RuntimeException("Exercise not found: " + ex.getExerciseId()));
+        }
+    }
+
+    private String normalizeDifficulty(String difficultyLevel) {
+        if (difficultyLevel == null || difficultyLevel.trim().isEmpty()) {
+            return "Beginner";
+        }
+        return difficultyLevel.trim();
     }
 }

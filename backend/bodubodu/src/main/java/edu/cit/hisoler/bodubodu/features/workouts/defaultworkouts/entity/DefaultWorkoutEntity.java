@@ -14,6 +14,10 @@ public class DefaultWorkoutEntity {
 
     private String name;
 
+    private String description;
+
+    private String difficultyLevel = "Beginner";
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
     // GETTERS AND SETTERS
@@ -32,6 +36,22 @@ public class DefaultWorkoutEntity {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getDifficultyLevel() {
+        return difficultyLevel;
+    }
+
+    public void setDifficultyLevel(String difficultyLevel) {
+        this.difficultyLevel = difficultyLevel;
     }
 
     public LocalDateTime getCreatedAt() {

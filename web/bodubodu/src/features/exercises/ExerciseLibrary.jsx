@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import "../admin/AdminPanel.css";
 
 const BASE_URL = "http://localhost:8080";
@@ -71,12 +71,67 @@ function ConfirmModal({ title, message, confirmText = "Delete", onConfirm, onCan
 const MUSCLE_GROUPS = ["Chest", "Core", "Legs", "Back", "Arms", "Glutes", "Full Body", "Shoulders"];
 const DIFFICULTY_LEVELS = ["Beginner", "Intermediate", "Advanced"];
 
+function getExerciseMedia(exercise) {
+  return exercise?.video || exercise?.image || "";
+}
+
+function ExerciseDetailModal({ exercise, onClose }) {
+  const media = getExerciseMedia(exercise);
+
+  return (
+    <div className="ap-overlay" onClick={onClose}>
+      <div className="ap-modal ap-modal--exercise" onClick={(ev) => ev.stopPropagation()}>
+        <div className="ap-modal__header">
+          <div className="ap-modal__header-left">
+            <div className="ap-modal__icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+                <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z" />
+              </svg>
+            </div>
+            <h2>{exercise.name}</h2>
+          </div>
+          <button className="ap-modal__close" onClick={onClose}>x</button>
+        </div>
+
+        <div className="ap-modal__body">
+          <div className="ap-exercise-detail">
+            <div className="ap-exercise-media">
+              {media ? (
+                media.match(/\.(gif|png|jpe?g|webp)(\?.*)?$/i) ? (
+                  <img src={media} alt={exercise.name} />
+                ) : (
+                  <video src={media} autoPlay loop muted playsInline />
+                )
+              ) : (
+                <span>Exercise media</span>
+              )}
+            </div>
+
+            <div className="ap-exercise-info">
+              <div className="ap-exercise-badges">
+                <span className={`ap-diff ${diffClass(exercise.difficultyLevel)}`}>
+                  {exercise.difficultyLevel || "Beginner"}
+                </span>
+                <span className="ap-exercise-muscle">{exercise.targetMuscleGroup || "Target muscle"}</span>
+              </div>
+              <p>{exercise.description || "No description available."}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function ExerciseModal({ editData, onSave, onClose }) {
   const [form, setForm] = useState({
     name: editData?.name || "",
     description: editData?.description || "",
     difficultyLevel: editData?.difficultyLevel || "Beginner",
     targetMuscleGroup: editData?.targetMuscleGroup || "Core",
+    video: editData?.video || "",
+    image: editData?.image || "",
   });
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
@@ -155,6 +210,16 @@ function ExerciseModal({ editData, onSave, onClose }) {
             />
             {errors.description && <span className="ap-field-err">{errors.description}</span>}
           </div>
+
+          <div className="ap-form-row">
+            <label className="ap-label">GIF / Video URL</label>
+            <input
+              className="ap-input"
+              placeholder="Paste Supabase media URL when available"
+              value={form.video}
+              onChange={(e) => setForm((f) => ({ ...f, video: e.target.value }))}
+            />
+          </div>
         </div>
 
         <div className="ap-modal__footer">
@@ -198,6 +263,7 @@ function ExerciseLibrary() {
   const [filter, setFilter] = useState("All");
   const [showModal, setShowModal] = useState(false);
   const [editTarget, setEditTarget] = useState(null);
+  const [detailTarget, setDetailTarget] = useState(null);
   const [delTarget, setDelTarget] = useState(null);
   const [notif, setNotif] = useState({ msg: "", type: "success" });
 
@@ -266,11 +332,15 @@ function ExerciseLibrary() {
     await fetchExercises();
   }
 
-  const filteredExercises = exercises.filter((ex) => {
-    const matchSearch = ex.name.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = filter === "All" || (ex.targetMuscleGroup || "").toLowerCase() === filter.toLowerCase();
-    return matchSearch && matchFilter;
-  });
+  const filteredExercises = useMemo(() => (
+    exercises
+      .filter((ex) => {
+        const matchSearch = ex.name.toLowerCase().includes(search.toLowerCase());
+        const matchFilter = filter === "All" || (ex.targetMuscleGroup || "").toLowerCase() === filter.toLowerCase();
+        return matchSearch && matchFilter;
+      })
+      .sort((a, b) => (a.name || "").localeCompare(b.name || "", undefined, { sensitivity: "base" }))
+  ), [exercises, search, filter]);
 
   return (
     <div className="ap-page">
@@ -352,7 +422,16 @@ function ExerciseLibrary() {
       ) : (
         <div className="ap-card-grid">
           {filteredExercises.map((ex) => (
-            <div key={ex.exerciseId} className="ap-card">
+            <div
+              key={ex.exerciseId}
+              className="ap-card ap-card--clickable"
+              role="button"
+              tabIndex={0}
+              onClick={() => setDetailTarget(ex)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") setDetailTarget(ex);
+              }}
+            >
               <div className="ap-card__top">
                 <div>
                   <div className="ap-card__name">{ex.name}</div>
@@ -375,7 +454,7 @@ function ExerciseLibrary() {
                 <div className="ap-card__actions">
                   <button
                     className="ap-btn ap-btn--edit"
-                    onClick={() => { setEditTarget(ex); setShowModal(true); }}
+                    onClick={(e) => { e.stopPropagation(); setEditTarget(ex); setShowModal(true); }}
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
@@ -385,7 +464,7 @@ function ExerciseLibrary() {
                   </button>
                   <button
                     className="ap-btn ap-btn--delete"
-                    onClick={() => setDelTarget(ex)}
+                    onClick={(e) => { e.stopPropagation(); setDelTarget(ex); }}
                   >
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <polyline points="3 6 5 6 21 6" /><path d="M19 6l-1 14H6L5 6" />
@@ -406,6 +485,12 @@ function ExerciseLibrary() {
           editData={editTarget}
           onSave={handleSaveExercise}
           onClose={() => { setShowModal(false); setEditTarget(null); }}
+        />
+      )}
+      {detailTarget && (
+        <ExerciseDetailModal
+          exercise={detailTarget}
+          onClose={() => setDetailTarget(null)}
         />
       )}
       {delTarget && (

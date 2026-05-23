@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import "../admin/AdminPanel.css";
 import "./CustomWorkouts.css";
 
@@ -90,7 +90,9 @@ function WorkoutModal({ editData, allExercises, onSave, onClose }) {
   );
   const [exSearch, setExSearch] = useState("");
   const [errors, setErrors] = useState({});
+  const [saveError, setSaveError] = useState("");
   const [saving, setSaving] = useState(false);
+  const [dragIndex, setDragIndex] = useState(null);
 
   const filteredEx = allExercises.filter((e) =>
     e.name.toLowerCase().includes(exSearch.toLowerCase()) ||
@@ -107,11 +109,49 @@ function WorkoutModal({ editData, allExercises, onSave, onClose }) {
   }
 
   function updateField(i, field, value) {
+    const raw = value === "" ? "" : Number(value);
     setSelected((prev) => {
       const next = [...prev];
-      next[i] = { ...next[i], [field]: value === "" ? "" : Number(value) };
+      next[i] = { ...next[i], [field]: raw };
       return next;
     });
+  }
+
+  const FIELD_MAX = { sets: 8, repetitions: 100, restInterval: 420 };
+  const FIELD_MIN = { sets: 1, repetitions: 1, restInterval: 0 };
+
+  function clampField(i, field, value) {
+    const raw = Number(value) || 0;
+    const clamped = Math.min(FIELD_MAX[field] ?? Infinity, Math.max(FIELD_MIN[field] ?? 0, raw));
+    setSelected((prev) => {
+      const next = [...prev];
+      next[i] = { ...next[i], [field]: clamped };
+      return next;
+    });
+  }
+
+  function reorderSelected(from, to) {
+    if (from === null || Number.isNaN(from) || from === to) return;
+    setSelected((prev) => {
+      if (from < 0 || to < 0 || from >= prev.length || to >= prev.length) return prev;
+      const next = [...prev];
+      const [moved] = next.splice(from, 1);
+      next.splice(to, 0, moved);
+      return next;
+    });
+  }
+
+  function handleDragStart(e, index) {
+    setDragIndex(index);
+    e.dataTransfer.effectAllowed = "move";
+    e.dataTransfer.setData("text/plain", String(index));
+  }
+
+  function handleDrop(e, index) {
+    e.preventDefault();
+    const from = dragIndex ?? Number(e.dataTransfer.getData("text/plain"));
+    reorderSelected(from, index);
+    setDragIndex(null);
   }
 
   function validate() {
@@ -124,17 +164,23 @@ function WorkoutModal({ editData, allExercises, onSave, onClose }) {
   async function handleSave() {
     const err = validate();
     if (Object.keys(err).length) { setErrors(err); return; }
+    setSaveError("");
     setSaving(true);
-    await onSave({
-      ...form,
-      exercises: selected.map((s) => ({
-        exerciseId: s.exerciseId,
-        sets: s.sets || 3,
-        repetitions: s.repetitions || 10,
-        restInterval: s.restInterval || 30,
-      })),
-    });
-    setSaving(false);
+    try {
+      await onSave({
+        ...form,
+        exercises: selected.map((s) => ({
+          exerciseId: s.exerciseId,
+          sets: s.sets || 3,
+          repetitions: s.repetitions || 10,
+          restInterval: s.restInterval || 30,
+        })),
+      });
+    } catch (error) {
+      setSaveError(error.message || "Failed to save workout");
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -155,7 +201,7 @@ function WorkoutModal({ editData, allExercises, onSave, onClose }) {
         <div className="ap-modal__body">
           <div className="ap-form-row ap-form-row--2col">
             <div>
-              <label className="ap-label">Workout Name <span className="ap-req">*</span></label>
+              {/* <label className="ap-label">Workout Name <span className="ap-req">*</span></label> */}
               <input
                 className={`ap-input${errors.name ? " ap-input--err" : ""}`}
                 placeholder="e.g. Full Body Beginner"
@@ -165,7 +211,7 @@ function WorkoutModal({ editData, allExercises, onSave, onClose }) {
               {errors.name && <span className="ap-field-err">{errors.name}</span>}
             </div>
             <div>
-              <label className="ap-label">Difficulty Level</label>
+              {/* <label className="ap-label">Difficulty Level</label> */}
               <select
                 className="ap-select"
                 value={form.difficultyLevel}
@@ -177,7 +223,7 @@ function WorkoutModal({ editData, allExercises, onSave, onClose }) {
           </div>
 
           <div className="ap-form-row">
-            <label className="ap-label">Description</label>
+            {/* <label className="ap-label">Description</label> */}
             <textarea
               className="ap-textarea"
               placeholder="Describe this workout program…"
@@ -237,16 +283,35 @@ function WorkoutModal({ editData, allExercises, onSave, onClose }) {
                   <p>Click exercises on the left to add them</p>
                 </div>
               ) : (
-                <div className="ap-sel-rows">
-                  <div className="ap-sel-header-row">
-                    <span>Exercise</span><span>Sets</span><span>Reps</span><span>Rest (s)</span><span></span>
+                <div className="ap-sel-rows ap-sel-rows--draggable">
+                  <div className="ap-sel-header-row ap-sel-header-row--draggable">
+                    <span></span><span>Exercise</span><span>Sets</span><span>Reps</span><span>Rest (s)</span><span></span>
                   </div>
                   {selected.map((s, i) => (
-                    <div key={i} className="ap-sel-row">
+                    <div
+                      key={s.exerciseId}
+                      className={`ap-sel-row ap-sel-row--draggable${dragIndex === i ? " ap-sel-row--dragging" : ""}`}
+                      onDragOver={(e) => e.preventDefault()}
+                      onDrop={(e) => handleDrop(e, i)}
+                      onDragEnd={() => setDragIndex(null)}
+                    >
+                      <button
+                        type="button"
+                        className="ap-drag-handle"
+                        draggable
+                        onDragStart={(e) => handleDragStart(e, i)}
+                        title="Drag to reorder"
+                      >
+                        <svg viewBox="0 0 16 16" aria-hidden="true">
+                          <circle cx="5" cy="4" r="1.2" /><circle cx="11" cy="4" r="1.2" />
+                          <circle cx="5" cy="8" r="1.2" /><circle cx="11" cy="8" r="1.2" />
+                          <circle cx="5" cy="12" r="1.2" /><circle cx="11" cy="12" r="1.2" />
+                        </svg>
+                      </button>
                       <span className="ap-sel-row__name">{s.name}</span>
-                      <input type="number" min="1" max="8" value={s.sets} className="ap-sel-input" onChange={(e) => updateField(i, "sets", e.target.value)} />
-                      <input type="number" min="1" max="100" value={s.repetitions} className="ap-sel-input" onChange={(e) => updateField(i, "repetitions", e.target.value)} />
-                      <input type="number" min="0" max="420" value={s.restInterval} className="ap-sel-input" onChange={(e) => updateField(i, "restInterval", e.target.value)} />
+                      <input type="number" min="1" max="8" value={s.sets} className="ap-sel-input" onChange={(e) => updateField(i, "sets", e.target.value)} onBlur={(e) => clampField(i, "sets", e.target.value)} />
+                      <input type="number" min="1" max="100" value={s.repetitions} className="ap-sel-input" onChange={(e) => updateField(i, "repetitions", e.target.value)} onBlur={(e) => clampField(i, "repetitions", e.target.value)} />
+                      <input type="number" min="0" max="420" value={s.restInterval} className="ap-sel-input" onChange={(e) => updateField(i, "restInterval", e.target.value)} onBlur={(e) => clampField(i, "restInterval", e.target.value)} />
                       <button className="ap-remove-btn" onClick={() => setSelected((prev) => prev.filter((_, idx) => idx !== i))}>✕</button>
                     </div>
                   ))}
@@ -257,6 +322,7 @@ function WorkoutModal({ editData, allExercises, onSave, onClose }) {
         </div>
 
         <div className="ap-modal__footer">
+          {saveError && <span className="ap-field-err" style={{ marginRight: "auto" }}>{saveError}</span>}
           <button className="ap-btn ap-btn--outline" onClick={onClose}>Cancel</button>
           <button className="ap-btn ap-btn--primary" onClick={handleSave} disabled={saving}>
             {saving ? "Saving…" : editData ? "Save Changes" : "Create Workout"}
@@ -289,7 +355,7 @@ function SessionModal({ workout, onClose }) {
   const [phase, setPhase] = useState("exercise");
   const [secs, setSecs] = useState(null);
   const [timerKey, setTimerKey] = useState(0);
-  const startTime = { current: Date.now() };
+  const startTime = useRef(Date.now());
 
   const currentEx = exList[exIdx] || {};
   const exName = currentEx.exerciseName || currentEx.name || `Exercise ${exIdx + 1}`;
@@ -518,11 +584,15 @@ function DefaultWorkouts() {
     await fetchWorkouts();
   }
 
-  const filtered = workouts.filter((w) => {
-    const matchSearch = w.name.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = filter === "All" || (w.difficultyLevel || "").toLowerCase() === filter.toLowerCase();
-    return matchSearch && matchFilter;
-  });
+  const filtered = useMemo(() => (
+    workouts
+      .filter((w) => {
+        const matchSearch = w.name.toLowerCase().includes(search.toLowerCase());
+        const matchFilter = filter === "All" || (w.difficultyLevel || "").toLowerCase() === filter.toLowerCase();
+        return matchSearch && matchFilter;
+      })
+      .sort((a, b) => (a.name || "").localeCompare(b.name || "", undefined, { sensitivity: "base" }))
+  ), [workouts, search, filter]);
 
   return (
     <div className="ap-page">
@@ -543,7 +613,7 @@ function DefaultWorkouts() {
               Admin
             </div>
           )}
-          <h1 className="ap-page__title">Default Workouts</h1>
+          <h1 className="ap-page__title">Predefined Workouts</h1>
           <p className="ap-page__sub">
             {isAdmin
               ? "Manage the default workout library — create, edit, or remove workouts."

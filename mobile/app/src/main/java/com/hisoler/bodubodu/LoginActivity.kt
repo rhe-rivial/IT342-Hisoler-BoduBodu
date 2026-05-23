@@ -12,6 +12,11 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (AuthStore.token(this).isNotBlank()) {
+            startActivity(Intent(this, DashboardActivity::class.java))
+            finish()
+            return
+        }
         setContentView(R.layout.activity_login)
 
         val etEmail   = findViewById<TextInputEditText>(R.id.etEmail)
@@ -58,31 +63,19 @@ class LoginActivity : AppCompatActivity() {
             val request = com.hisoler.bodubodu.network.LoginRequest(email, password)
 
             com.hisoler.bodubodu.network.RetrofitClient.api.login(request)
-                .enqueue(object : retrofit2.Callback<com.hisoler.bodubodu.network.User> {
+                .enqueue(object : retrofit2.Callback<com.hisoler.bodubodu.network.LoginResponse> {
 
                     override fun onResponse(
-                        call: retrofit2.Call<com.hisoler.bodubodu.network.User>,
-                        response: retrofit2.Response<com.hisoler.bodubodu.network.User>
+                        call: retrofit2.Call<com.hisoler.bodubodu.network.LoginResponse>,
+                        response: retrofit2.Response<com.hisoler.bodubodu.network.LoginResponse>
                     ) {
-                        btnSignIn.isEnabled = true
-                        btnSignIn.text = "Sign In"
-
-                        if (response.isSuccessful) {
-                            val user = response.body()!!
-
-                            AppToast.success(
-                                this@LoginActivity,
-                                "Welcome back, ${user.firstName}!"
-                            )
-
-                            val intent = Intent(this@LoginActivity, DashboardActivity::class.java)
-                            intent.putExtra("firstName", user.firstName)
-                            intent.putExtra("lastName",  user.lastName)
-                            intent.putExtra("email",     user.email)
-                            startActivity(intent)
-                            finish()
-
+                        if (response.isSuccessful && response.body()?.token?.isNotBlank() == true) {
+                            val token = response.body()!!.token
+                            AuthStore.saveToken(this@LoginActivity, token)
+                            loadSignedInUser(btnSignIn)
                         } else {
+                            btnSignIn.isEnabled = true
+                            btnSignIn.text = "Sign In"
                             val msg = when (response.code()) {
                                 401  -> "Invalid email or password."
                                 404  -> "Account not found."
@@ -93,7 +86,7 @@ class LoginActivity : AppCompatActivity() {
                     }
 
                     override fun onFailure(
-                        call: retrofit2.Call<com.hisoler.bodubodu.network.User>,
+                        call: retrofit2.Call<com.hisoler.bodubodu.network.LoginResponse>,
                         t: Throwable
                     ) {
                         btnSignIn.isEnabled = true
@@ -102,5 +95,39 @@ class LoginActivity : AppCompatActivity() {
                     }
                 })
         }
+    }
+
+    private fun loadSignedInUser(btnSignIn: MaterialButton) {
+        com.hisoler.bodubodu.network.RetrofitClient.api.me(AuthStore.authHeader(this))
+            .enqueue(object : retrofit2.Callback<com.hisoler.bodubodu.network.User> {
+                override fun onResponse(
+                    call: retrofit2.Call<com.hisoler.bodubodu.network.User>,
+                    response: retrofit2.Response<com.hisoler.bodubodu.network.User>
+                ) {
+                    btnSignIn.isEnabled = true
+                    btnSignIn.text = "Sign In"
+
+                    if (response.isSuccessful && response.body() != null) {
+                        val user = response.body()!!
+                        AuthStore.saveUser(this@LoginActivity, user)
+                        AppToast.success(this@LoginActivity, "Welcome back, ${user.firstName}!")
+                        startActivity(Intent(this@LoginActivity, DashboardActivity::class.java))
+                        finish()
+                    } else {
+                        AuthStore.clear(this@LoginActivity)
+                        AppToast.error(this@LoginActivity, "Could not load your account.")
+                    }
+                }
+
+                override fun onFailure(
+                    call: retrofit2.Call<com.hisoler.bodubodu.network.User>,
+                    t: Throwable
+                ) {
+                    btnSignIn.isEnabled = true
+                    btnSignIn.text = "Sign In"
+                    AuthStore.clear(this@LoginActivity)
+                    AppToast.error(this@LoginActivity, "Connection error: ${t.message}")
+                }
+            })
     }
 }

@@ -74,6 +74,9 @@ public class DashboardController {
             Map<String, Object> m = new LinkedHashMap<>();
             m.put("id",          s.getId());
             m.put("workoutName", s.getWorkoutName());
+            m.put("workoutType", s.getCustomWorkoutId() != null ? "CUSTOM" : "DEFAULT");
+            m.put("defaultWorkoutId", s.getDefaultWorkoutId());
+            m.put("customWorkoutId",  s.getCustomWorkoutId());
             m.put("duration",    s.getDuration());
             m.put("exercises",   s.getExercises());
             m.put("completedAt", s.getCompletedAt());

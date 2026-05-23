@@ -15,7 +15,7 @@ public class ExerciseEntity {
     private String difficultyLevel;
     private String targetMuscleGroup;
     private String video;
-    private String image;
+    // private String image;
 
     // GETTERS AND SETTERS
 
@@ -67,11 +67,11 @@ public class ExerciseEntity {
         this.video = video;
     }
 
-    public String getImage() {
-        return image;
-    }
+    // public String getImage() {
+    //     return image;
+    // }
 
-    public void setImage(String image) {
-        this.image = image;
-    }
+    // public void setImage(String image) {
+    //     this.image = image;
+    // }
 }
