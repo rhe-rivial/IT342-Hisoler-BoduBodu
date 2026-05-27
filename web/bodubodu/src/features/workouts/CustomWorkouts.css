@@ -567,6 +567,7 @@
   height: 100%;
   object-fit: contain;
   background: #111;
+  pointer-events: none;
 }
 .cw-session-content {
   flex: 1;

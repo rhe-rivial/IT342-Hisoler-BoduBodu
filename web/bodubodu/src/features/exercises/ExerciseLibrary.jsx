@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import "../admin/AdminPanel.css";
 
 const BASE_URL = "http://localhost:8080";
@@ -118,6 +118,31 @@ function getExerciseMedia(exercise) {
   return exercise?.video || exercise?.image || "";
 }
 
+function keepVideoPlaying(event) {
+  const video = event.currentTarget;
+  if (!video || video.ended) return;
+  video.play().catch(() => {});
+}
+
+function LockedVideo({ src, className }) {
+  return (
+    <video
+      className={className}
+      src={src}
+      autoPlay
+      loop
+      muted
+      playsInline
+      controls={false}
+      controlsList="nodownload noplaybackrate noremoteplayback"
+      disablePictureInPicture
+      onClick={keepVideoPlaying}
+      onPause={keepVideoPlaying}
+      onContextMenu={(event) => event.preventDefault()}
+    />
+  );
+}
+
 function ExerciseDetailModal({ exercise, onClose }) {
   const media = getExerciseMedia(exercise);
 
@@ -144,7 +169,7 @@ function ExerciseDetailModal({ exercise, onClose }) {
                 media.match(/\.(gif|png|jpe?g|webp)(\?.*)?$/i) ? (
                   <img src={media} alt={exercise.name} />
                 ) : (
-                  <video src={media} autoPlay loop muted playsInline />
+                  <LockedVideo src={media} />
                 )
               ) : (
                 <span>Exercise media</span>
@@ -179,6 +204,13 @@ function ExerciseModal({ editData, onSave, onClose }) {
   const [mediaFile, setMediaFile] = useState(null);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
+  const fileInputRef = useRef(null);
+
+  function handlePickFile(e) {
+    e.preventDefault();
+    e.stopPropagation();
+    if (fileInputRef.current) fileInputRef.current.click();
+  }
 
   function validate() {
     const e = {};
@@ -210,7 +242,7 @@ function ExerciseModal({ editData, onSave, onClose }) {
     if (Object.keys(err).length) { setErrors(err); return; }
     setSaving(true);
     try {
-      let videoUrl = form.video.trim();
+      let videoUrl = form.video;
 
       if (mediaFile) {
         videoUrl = await uploadExerciseMedia(mediaFile, form.name);
@@ -280,23 +312,21 @@ function ExerciseModal({ editData, onSave, onClose }) {
           </div>
 
           <div className="ap-form-row">
-            <label className="ap-label">GIF / Video URL</label>
+            <label className="ap-label">Exercise Video</label>
             <input
-              className="ap-input"
-              placeholder="Automatically filled after upload, or paste a URL"
-              value={form.video}
-              onChange={(e) => setForm((f) => ({ ...f, video: e.target.value }))}
+              ref={fileInputRef}
+              type="file"
+              accept="video/mp4,image/gif,.mp4,.gif"
+              style={{ display: "none" }}
+              onChange={handleMediaFileChange}
             />
-          </div>
-
-          <div className="ap-form-row">
-            <label className="ap-label">Upload MP4 / GIF</label>
-            <label className={`ap-file-upload${errors.media ? " ap-input--err" : ""}`}>
-              <input
-                type="file"
-                accept="video/mp4,image/gif,.mp4,.gif"
-                onChange={handleMediaFileChange}
-              />
+            <div
+              className={`ap-file-upload${errors.media ? " ap-input--err" : ""}`}
+              role="button"
+              tabIndex={0}
+              onClick={handlePickFile}
+              onKeyDown={(e) => { if (e.key === "Enter" || e.key === " ") handlePickFile(e); }}
+            >
               <span className="ap-file-upload__icon">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
@@ -305,12 +335,20 @@ function ExerciseModal({ editData, onSave, onClose }) {
                 </svg>
               </span>
               <span className="ap-file-upload__text">
-                {mediaFile ? mediaFile.name : "Choose MP4 or GIF file"}
+                {mediaFile ? mediaFile.name : "Click here to choose a file"}
               </span>
-            </label>
+              {!mediaFile && (
+                <span className="ap-file-upload__hint">MP4 or GIF · max 100MB</span>
+              )}
+            </div>
             {mediaFile && (
               <span className="ap-field-hint">
-                This file will upload to Supabase Storage, then its URL will be saved to the exercise.
+                This file will upload to Supabase Storage when you save.
+              </span>
+            )}
+            {!mediaFile && form.video && (
+              <span className="ap-field-hint">
+                Current uploaded video will stay saved unless you choose a new file.
               </span>
             )}
             {errors.media && <span className="ap-field-err">{errors.media}</span>}

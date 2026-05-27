@@ -371,10 +371,28 @@ function durationFromReps(reps) {
 }
 
 function MediaPanel({ src }) {
+  function keepPlaying(event) {
+    const video = event.currentTarget;
+    if (!video || video.ended) return;
+    video.play().catch(() => {});
+  }
+
   return (
     <div className="cw-session-video">
       {src ? (
-        <video src={src} autoPlay loop muted playsInline controls />
+        <video
+          src={src}
+          autoPlay
+          loop
+          muted
+          playsInline
+          controls={false}
+          controlsList="nodownload noplaybackrate noremoteplayback"
+          disablePictureInPicture
+          onClick={keepPlaying}
+          onPause={keepPlaying}
+          onContextMenu={(event) => event.preventDefault()}
+        />
       ) : (
         <span>No exercise video available</span>
       )}

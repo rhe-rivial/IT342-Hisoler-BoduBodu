@@ -211,8 +211,11 @@ open class BaseScreenActivity : AppCompatActivity() {
         }
         val video = VideoView(this).apply {
             setVideoURI(Uri.parse(url))
-            setMediaController(MediaController(this@BaseScreenActivity))
             setOnPreparedListener { it.isLooping = true; start() }
+            setOnCompletionListener { start() }
+            setOnClickListener { start() }
+            isFocusable = false
+            isFocusableInTouchMode = false
         }
         content.addView(video, LinearLayout.LayoutParams(-1, dp(220)).bottom(dp(12)))
     }

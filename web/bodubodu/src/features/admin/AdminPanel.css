@@ -744,6 +744,7 @@
   height: 100%;
   object-fit: contain;
   display: block;
+  pointer-events: none;
 }
 
 .ap-exercise-info {
@@ -790,6 +791,7 @@
 }
 
 .ap-label {
+  position: static;
   font-size: 12px;
   font-weight: 600;
   color: var(--text-muted);
@@ -835,16 +837,21 @@
 }
 
 .ap-file-upload {
+  position: relative;
+  overflow: hidden;
+  user-select: none;
   width: 100%;
-  min-height: 40px;
-  padding: 9px 12px;
-  border: 1.5px dashed var(--card-border);
+  min-height: 90px;
+  padding: 20px 16px;
+  border: 2px dashed var(--card-border);
   border-radius: var(--radius-sm);
   background: var(--bg);
   color: var(--text-muted);
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 9px;
+  justify-content: center;
+  gap: 8px;
   cursor: pointer;
   box-sizing: border-box;
   transition: var(--transition);
@@ -856,19 +863,18 @@
   color: var(--primary);
 }
 
-.ap-file-upload input {
-  display: none;
-}
 
 .ap-file-upload__icon {
-  width: 18px;
-  height: 18px;
+  width: 28px;
+  height: 28px;
   flex-shrink: 0;
+  pointer-events: none;
+  opacity: 0.5;
 }
 
 .ap-file-upload__icon svg {
-  width: 18px;
-  height: 18px;
+  width: 28px;
+  height: 28px;
 }
 
 .ap-file-upload__text {
@@ -878,6 +884,15 @@
   white-space: nowrap;
   font-size: 13px;
   font-weight: 500;
+  pointer-events: none;
+  text-align: center;
+}
+
+.ap-file-upload__hint {
+  font-size: 11px;
+  pointer-events: none;
+  opacity: 0.6;
+  text-align: center;
 }
 
 .ap-section-label {
