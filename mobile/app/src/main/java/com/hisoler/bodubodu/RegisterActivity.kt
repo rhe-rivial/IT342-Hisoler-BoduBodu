@@ -11,6 +11,8 @@ import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.hisoler.bodubodu.network.GoogleAuthRequest
+import com.hisoler.bodubodu.network.LoginResponse
 
 class RegisterActivity : AppCompatActivity() {
 
@@ -27,6 +29,7 @@ class RegisterActivity : AppCompatActivity() {
     private lateinit var etConfirmPassword: TextInputEditText
 
     private lateinit var btnRegister: MaterialButton
+    private lateinit var btnGoogle: MaterialButton
     private lateinit var tvLogin: TextView
     private lateinit var tvPasswordStrength: TextView
 
@@ -52,6 +55,7 @@ class RegisterActivity : AppCompatActivity() {
         etConfirmPassword  = findViewById(R.id.etConfirmPassword)
 
         btnRegister        = findViewById(R.id.btnRegister)
+        btnGoogle          = findViewById(R.id.btnGoogle)
         tvLogin            = findViewById(R.id.tvLogin)
         tvPasswordStrength = findViewById(R.id.tvPasswordStrength)
 
@@ -86,6 +90,70 @@ class RegisterActivity : AppCompatActivity() {
         btnRegister.setOnClickListener {
             if (validateAll()) submitRegistration()
         }
+
+        btnGoogle.setOnClickListener {
+            if (getString(R.string.google_web_client_id).startsWith("YOUR_WEB_CLIENT_ID")) {
+                AppToast.error(this, "Set google_web_client_id in strings.xml first.")
+                return@setOnClickListener
+            }
+            startActivityForResult(GoogleAuthHelper.signInIntent(this), GoogleAuthHelper.RC_GOOGLE_SIGN_IN)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: android.content.Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode != GoogleAuthHelper.RC_GOOGLE_SIGN_IN) return
+        val credential = GoogleAuthHelper.accountFromResult(data)?.idToken
+        if (credential.isNullOrBlank()) {
+            AppToast.error(this, "Google sign-up was cancelled.")
+            return
+        }
+
+        btnGoogle.isEnabled = false
+        btnRegister.isEnabled = false
+
+        com.hisoler.bodubodu.network.RetrofitClient.api.googleAuth(GoogleAuthRequest(credential))
+            .enqueue(object : retrofit2.Callback<LoginResponse> {
+                override fun onResponse(
+                    call: retrofit2.Call<LoginResponse>,
+                    response: retrofit2.Response<LoginResponse>
+                ) {
+                    btnGoogle.isEnabled = true
+                    btnRegister.isEnabled = true
+
+                    if (response.isSuccessful && response.body()?.token?.isNotBlank() == true) {
+                        AuthStore.saveToken(this@RegisterActivity, response.body()!!.token)
+                        loadGoogleUser()
+                    } else {
+                        AppToast.error(this@RegisterActivity, "Google authentication failed.")
+                    }
+                }
+
+                override fun onFailure(call: retrofit2.Call<LoginResponse>, t: Throwable) {
+                    btnGoogle.isEnabled = true
+                    btnRegister.isEnabled = true
+                    AppToast.error(this@RegisterActivity, "Connection error: ${t.message}")
+                }
+            })
+    }
+
+    private fun loadGoogleUser() {
+        com.hisoler.bodubodu.network.RetrofitClient.api.me(AuthStore.authHeader(this))
+            .enqueue(object : retrofit2.Callback<com.hisoler.bodubodu.network.User> {
+                override fun onResponse(
+                    call: retrofit2.Call<com.hisoler.bodubodu.network.User>,
+                    response: retrofit2.Response<com.hisoler.bodubodu.network.User>
+                ) {
+                    response.body()?.let { AuthStore.saveUser(this@RegisterActivity, it) }
+                    AppToast.success(this@RegisterActivity, "Welcome to BoduBodu!")
+                    startActivity(android.content.Intent(this@RegisterActivity, DashboardActivity::class.java))
+                    finish()
+                }
+
+                override fun onFailure(call: retrofit2.Call<com.hisoler.bodubodu.network.User>, t: Throwable) {
+                    AppToast.error(this@RegisterActivity, "Connection error: ${t.message}")
+                }
+            })
     }
 
     private fun validateAll(): Boolean {

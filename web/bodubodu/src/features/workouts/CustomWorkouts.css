@@ -562,6 +562,12 @@
   color: rgba(255, 255, 255, 0.3);
   font-size: 13px;
 }
+.cw-session-video video {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #111;
+}
 .cw-session-content {
   flex: 1;
   padding: 28px 28px;

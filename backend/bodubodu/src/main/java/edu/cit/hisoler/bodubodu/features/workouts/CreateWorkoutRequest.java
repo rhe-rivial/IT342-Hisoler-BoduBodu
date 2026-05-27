@@ -14,6 +14,7 @@ public class CreateWorkoutRequest {
         private int sets;
         private int repetitions;
         private int restInterval;
+        private int exerciseOrder;
 
         public Long getExerciseId() {
             return exerciseId;
@@ -45,6 +46,14 @@ public class CreateWorkoutRequest {
 
         public void setRestInterval(int restInterval) {
             this.restInterval = restInterval;
+        }
+
+        public int getExerciseOrder() {
+            return exerciseOrder;
+        }
+
+        public void setExerciseOrder(int exerciseOrder) {
+            this.exerciseOrder = exerciseOrder;
         }
     }
 

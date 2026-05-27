@@ -346,6 +346,18 @@ function durationFromReps(reps) {
   return 175;
 }
 
+function MediaPanel({ src }) {
+  return (
+    <div className="cw-session-video">
+      {src ? (
+        <video src={src} autoPlay loop muted playsInline controls />
+      ) : (
+        <span>No exercise video available</span>
+      )}
+    </div>
+  );
+}
+
 function SessionModal({ workout, onClose }) {
   const exList = workout.exercises || [];
   const totalSets = exList[0]?.sets || 1;
@@ -359,6 +371,7 @@ function SessionModal({ workout, onClose }) {
 
   const currentEx = exList[exIdx] || {};
   const exName = currentEx.exerciseName || currentEx.name || `Exercise ${exIdx + 1}`;
+  const media = currentEx.video || currentEx.image || "";
   const exDuration = durationFromReps(currentEx.repetitions || 10);
   const configRest = currentEx.restInterval ?? 30;
   const isLastEx = exIdx === exList.length - 1;
@@ -432,9 +445,7 @@ function SessionModal({ workout, onClose }) {
         </div>
 
         <div className="cw-session-body">
-          <div className="cw-session-video">
-            <span>Exercise Video</span>
-          </div>
+          <MediaPanel src={media} />
 
           <div className="cw-session-content">
             {phase === "exercise" ? (

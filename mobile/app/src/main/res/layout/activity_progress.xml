@@ -8,32 +8,25 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_header"
+        android:background="#E65100"
         android:orientation="vertical"
         android:padding="24dp">
 
         <TextView
+            android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="BoduBodu"
-            android:textColor="#FFFFFF"
-            android:textSize="20sp"
-            android:textStyle="bold" />
-
-        <TextView
-            android:id="@+id/tvWelcome"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Welcome, User!"
+            android:text="Progress"
             android:textColor="#FFFFFF"
             android:textSize="26sp"
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Ready for today's workout?"
+            android:layout_marginTop="4dp"
+            android:text="Your fitness journey at a glance."
             android:textColor="#FFCCBC"
             android:textSize="13sp" />
     </LinearLayout>

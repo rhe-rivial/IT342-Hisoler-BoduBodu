@@ -9,6 +9,8 @@ import edu.cit.hisoler.bodubodu.features.workouts.customworkouts.entity.CustomWo
 import edu.cit.hisoler.bodubodu.features.workouts.customworkouts.repository.CustomWorkoutExerciseRepository;
 import edu.cit.hisoler.bodubodu.features.workouts.customworkouts.repository.CustomWorkoutRepository;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,6 +20,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class CustomWorkoutService {
+    private static final Logger log = LoggerFactory.getLogger(CustomWorkoutService.class);
 
     private final CustomWorkoutRepository workoutRepo;
     private final CustomWorkoutExerciseRepository workoutExRepo;
@@ -37,10 +40,18 @@ public class CustomWorkoutService {
 
     // ── GET ALL WORKOUTS FOR USER ──────────────────────────────────
     public List<Map<String, Object>> getWorkoutsForUser(String email) {
-        UserEntity user = userRepo.findByEmail(email)
+        String normalizedEmail = email == null ? "" : email.trim();
+        UserEntity user = userRepo.findByEmailIgnoreCase(normalizedEmail)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         List<CustomWorkoutEntity> workouts = workoutRepo.findByUserId(user.getUserId());
+        log.info(
+                "Custom workouts lookup email={} userId={} found={} counted={}",
+                normalizedEmail,
+                user.getUserId(),
+                workouts.size(),
+                workoutRepo.countByUserId(user.getUserId())
+        );
 
         return workouts.stream().map(w -> {
             Map<String, Object> map = new LinkedHashMap<>();
@@ -48,7 +59,7 @@ public class CustomWorkoutService {
             map.put("name", w.getName());
             map.put("createdAt", w.getCreatedAt());
 
-            List<CustomWorkoutExerciseEntity> exList = workoutExRepo.findByCustomWorkoutId(w.getCustomWorkoutId());
+            List<CustomWorkoutExerciseEntity> exList = workoutExRepo.findOrderedByCustomWorkoutId(w.getCustomWorkoutId());
             List<Map<String, Object>> exercises = exList.stream().map(ex -> {
                 Map<String, Object> exMap = new LinkedHashMap<>();
                 exMap.put("customWorkoutExerciseId", ex.getCustomWorkoutExerciseId());
@@ -61,6 +72,7 @@ public class CustomWorkoutService {
                     exMap.put("exerciseName", e.getName());
                     exMap.put("difficultyLevel", e.getDifficultyLevel());
                     exMap.put("targetMuscleGroup", e.getTargetMuscleGroup());
+                    exMap.put("video", e.getVideo());
                 });
                 return exMap;
             }).collect(Collectors.toList());
@@ -73,7 +85,7 @@ public class CustomWorkoutService {
     // ── CREATE WORKOUT ─────────────────────────────────────────────
     @Transactional
     public Map<String, Object> createWorkout(String email, CreateWorkoutRequest req) {
-        UserEntity user = userRepo.findByEmail(email)
+        UserEntity user = userRepo.findByEmailIgnoreCase(email == null ? "" : email.trim())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Validate name
@@ -128,7 +140,7 @@ public class CustomWorkoutService {
     // ── UPDATE WORKOUT ─────────────────────────────────────────────
     @Transactional
     public Map<String, Object> updateWorkout(String email, Long workoutId, CreateWorkoutRequest req) {
-        UserEntity user = userRepo.findByEmail(email)
+        UserEntity user = userRepo.findByEmailIgnoreCase(email == null ? "" : email.trim())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         CustomWorkoutEntity workout = workoutRepo.findById(workoutId)
@@ -181,7 +193,7 @@ public class CustomWorkoutService {
     // ── DELETE WORKOUT ─────────────────────────────────────────────
     @Transactional
     public void deleteWorkout(String email, Long workoutId) {
-        UserEntity user = userRepo.findByEmail(email)
+        UserEntity user = userRepo.findByEmailIgnoreCase(email == null ? "" : email.trim())
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         CustomWorkoutEntity workout = workoutRepo.findById(workoutId)

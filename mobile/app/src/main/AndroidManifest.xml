@@ -16,6 +16,33 @@
         android:theme="@style/Theme.Bodubodu"
         tools:targetApi="31">
         <activity
+            android:name=".ExerciseDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".WorkoutDetailActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CustomWorkoutBuilderActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProfileActivity"
+            android:exported="false" />
+        <activity
+            android:name=".HistoryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ProgressActivity"
+            android:exported="false" />
+        <activity
+            android:name=".ExerciseLibraryActivity"
+            android:exported="false" />
+        <activity
+            android:name=".CustomWorkoutActivity"
+            android:exported="false" />
+        <activity
+            android:name=".WorkoutActivity"
+            android:exported="false" />
+        <activity
             android:name=".DashboardActivity"
             android:exported="false" />
         <activity

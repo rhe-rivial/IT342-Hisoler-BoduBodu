@@ -146,6 +146,21 @@
                         android:paddingBottom="14dp"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
+                <TextView
+                    android:id="@+id/tvForgotPassword"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Forgot password?"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="#E65100"
+                    android:layout_marginTop="8dp"
+                    android:layout_gravity="start"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:paddingTop="8dp"
+                    android:paddingBottom="8dp"/>
+
                 <!-- Sign In Button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSignIn"
@@ -186,7 +201,26 @@
                         android:background="#E0E0E0"/>
                 </LinearLayout>
 
-                <!-- Sign Up Link — ID matches LoginActivity.kt -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnGoogle"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:layout_marginTop="12dp"
+                    android:contentDescription="Continue with Google"
+                    android:text=""
+                    android:textColor="#212121"
+                    android:textSize="15sp"
+                    app:backgroundTint="#FFFFFF"
+                    app:cornerRadius="12dp"
+                    app:icon="@drawable/ic_google_g"
+                    app:iconGravity="textStart"
+                    app:iconPadding="0dp"
+                    app:iconSize="24dp"
+                    app:iconTint="@null"
+                    app:strokeColor="#E0E0E0"
+                    app:strokeWidth="1dp" />
+
+                <!-- Sign Up Link - ID matches LoginActivity.kt -->
                 <TextView
                     android:id="@+id/tvSignUp"
                     android:layout_width="wrap_content"

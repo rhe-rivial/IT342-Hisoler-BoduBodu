@@ -828,6 +828,58 @@
   margin-top: 2px;
 }
 
+.ap-field-hint {
+  font-size: 11px;
+  color: var(--text-hint);
+  line-height: 1.45;
+}
+
+.ap-file-upload {
+  width: 100%;
+  min-height: 40px;
+  padding: 9px 12px;
+  border: 1.5px dashed var(--card-border);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  cursor: pointer;
+  box-sizing: border-box;
+  transition: var(--transition);
+}
+
+.ap-file-upload:hover {
+  border-color: var(--primary);
+  background: var(--primary-light);
+  color: var(--primary);
+}
+
+.ap-file-upload input {
+  display: none;
+}
+
+.ap-file-upload__icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.ap-file-upload__icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.ap-file-upload__text {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  font-weight: 500;
+}
+
 .ap-section-label {
   font-size: 11px;
   font-weight: 700;

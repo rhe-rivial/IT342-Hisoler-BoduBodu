@@ -7,9 +7,11 @@ import java.util.Map;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import edu.cit.hisoler.bodubodu.features.auth.dto.ForgotPasswordRequest;
 import edu.cit.hisoler.bodubodu.features.auth.dto.GoogleAuthRequest;
 import edu.cit.hisoler.bodubodu.features.auth.dto.LoginRequest;
 import edu.cit.hisoler.bodubodu.features.auth.dto.RegisterRequest;
+import edu.cit.hisoler.bodubodu.features.auth.dto.ResetPasswordRequest;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -54,6 +56,25 @@ public class AuthController {
             return ResponseEntity.ok(Map.of("token", token));
         } catch (RuntimeException e) {
             return ResponseEntity.status(401).body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
+        authService.sendPasswordResetEmail(request);
+        return ResponseEntity.ok(Map.of(
+            "message",
+            "If that email is registered, a password reset link has been sent."
+        ));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<?> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        try {
+            authService.resetPassword(request);
+            return ResponseEntity.ok(Map.of("message", "Password reset successfully."));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(400).body(e.getMessage());
         }
     }
 }
