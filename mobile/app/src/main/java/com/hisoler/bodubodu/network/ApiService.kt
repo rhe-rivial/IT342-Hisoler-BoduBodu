@@ -19,6 +19,14 @@ data class LoginResponse(
     val token: String
 )
 
+data class GoogleAuthRequest(
+    val credential: String
+)
+
+data class ForgotPasswordRequest(
+    val email: String
+)
+
 data class RegisterRequest(
     val firstName: String,
     val lastName: String,
@@ -69,7 +77,8 @@ data class WorkoutExercise(
     val name: String? = null,
     val sets: Int = 3,
     val repetitions: Int = 10,
-    val restInterval: Int = 30
+    val restInterval: Int = 30,
+    val exerciseOrder: Int? = null
 )
 
 data class DefaultWorkout(
@@ -92,7 +101,8 @@ data class CreateWorkoutExercise(
     val exerciseId: Long,
     val sets: Int,
     val repetitions: Int,
-    val restInterval: Int
+    val restInterval: Int,
+    val exerciseOrder: Int
 )
 
 data class CreateCustomWorkoutRequest(
@@ -134,6 +144,12 @@ interface ApiService {
 
     @POST("api/auth/register")
     fun register(@Body request: RegisterRequest): Call<Void>
+
+    @POST("api/auth/google")
+    fun googleAuth(@Body request: GoogleAuthRequest): Call<LoginResponse>
+
+    @POST("api/auth/forgot-password")
+    fun forgotPassword(@Body request: ForgotPasswordRequest): Call<ApiMessage>
 
     @GET("api/user/me")
     fun me(@Header("Authorization") authorization: String): Call<User>

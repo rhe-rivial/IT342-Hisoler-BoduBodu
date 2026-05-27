@@ -27,6 +27,7 @@ function AuthContainer() {
 
   const [notification, setNotification] = useState({ type: "", message: "" });
   const [loading, setLoading] = useState(false);
+  const [resetLoading, setResetLoading] = useState(false);
 
   const isValidEmail = (email) =>
     /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -140,6 +141,46 @@ function AuthContainer() {
       type: "error",
       message: "Set REACT_APP_GOOGLE_CLIENT_ID before using Google sign-in."
     });
+  };
+
+  const handleForgotPassword = async () => {
+    if (!loginEmail.trim()) {
+      return setNotification({ type: "error", message: "Enter your email first, then request a reset link." });
+    }
+
+    if (!isValidEmail(loginEmail)) {
+      return setNotification({ type: "error", message: "Enter a valid email before requesting a reset link." });
+    }
+
+    try {
+      setResetLoading(true);
+
+      const response = await fetch(`${API_BASE}/auth/forgot-password`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          email: loginEmail.trim()
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error("Could not send reset email. Please try again.");
+      }
+
+      setNotification({
+        type: "success",
+        message: "If that email is registered, a password reset link has been sent."
+      });
+    } catch (error) {
+      setNotification({
+        type: "error",
+        message: error.message === "Failed to fetch" ? "Unable to connect to server." : error.message
+      });
+    } finally {
+      setResetLoading(false);
+    }
   };
 
   const GoogleLogo = () => (
@@ -403,6 +444,15 @@ function AuthContainer() {
             onChange={(e) => setLoginPassword(e.target.value)}
             onKeyDown={handleLoginKeyDown}
           />
+
+          <button
+            type="button"
+            className="forgot-password-link"
+            onClick={handleForgotPassword}
+            disabled={resetLoading || loading}
+          >
+            {resetLoading ? "Sending reset link..." : "Forgot password?"}
+          </button>
 
           <Button onClick={handleLogin} loading={loading}>
             Sign In

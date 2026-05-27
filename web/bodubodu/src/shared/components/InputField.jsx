@@ -5,6 +5,7 @@ function InputField({
   type = "text",
   value,
   onChange,
+  onKeyDown,
   error
 }) {
   return (
@@ -13,6 +14,7 @@ function InputField({
         type={type}
         value={value}
         onChange={onChange}
+        onKeyDown={onKeyDown}
         className={`input ${error ? "error" : ""}`}
         required
       />

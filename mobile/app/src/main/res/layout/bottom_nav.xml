@@ -2,7 +2,7 @@
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="horizontal"
-    android:background="#FFFFFF"
+    android:background="#E65100"
     android:elevation="10dp"
     android:layout_width="match_parent"
     android:layout_height="70dp"
@@ -11,6 +11,7 @@
 
     <!-- HOME -->
     <LinearLayout
+        android:id="@+id/navHome"
         android:layout_weight="1"
         android:gravity="center"
         android:orientation="vertical"
@@ -26,11 +27,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Home"
+            android:textColor="#000000"
             android:textSize="10sp"/>
     </LinearLayout>
 
     <!-- WORKOUT -->
     <LinearLayout
+        android:id="@+id/navWorkout"
         android:layout_weight="1"
         android:gravity="center"
         android:orientation="vertical"
@@ -46,33 +49,35 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Workout"
+            android:textColor="#000000"
             android:textSize="10sp"/>
     </LinearLayout>
 
-    <!-- ADD BUTTON -->
-    <FrameLayout
+    <!-- CUSTOM WORKOUT -->
+    <LinearLayout
+        android:id="@+id/navAdd"
         android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
         android:layout_width="0dp"
-        android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:foreground="?attr/selectableItemBackgroundBorderless">
-
-        <View
-            android:layout_width="56dp"
-            android:layout_height="56dp"
-            android:layout_gravity="center"
-            android:background="@drawable/bg_orange_circle"/>
+        android:layout_height="match_parent">
 
         <ImageView
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_gravity="center"
-            android:src="@drawable/ic_add"
-            android:tint="#FFFFFF"/>
-    </FrameLayout>
+            android:src="@drawable/ic_custom"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Custom"
+            android:textColor="#000000"
+            android:textSize="10sp"/>
+    </LinearLayout>
 
     <!-- LOGS -->
     <LinearLayout
+        android:id="@+id/navLogs"
         android:layout_weight="1"
         android:gravity="center"
         android:orientation="vertical"
@@ -88,11 +93,13 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Logs"
+            android:textColor="#000000"
             android:textSize="10sp"/>
     </LinearLayout>
 
     <!-- PROFILE -->
     <LinearLayout
+        android:id="@+id/navProfile"
         android:layout_weight="1"
         android:gravity="center"
         android:orientation="vertical"
@@ -108,6 +115,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Profile"
+            android:textColor="#000000"
             android:textSize="10sp"/>
     </LinearLayout>
 

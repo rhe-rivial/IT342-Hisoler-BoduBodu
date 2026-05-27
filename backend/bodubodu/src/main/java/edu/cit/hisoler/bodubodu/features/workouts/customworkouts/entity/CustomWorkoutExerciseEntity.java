@@ -8,13 +8,19 @@ public class CustomWorkoutExerciseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "custom_workout_exercise_id")
     private Long customWorkoutExerciseId;
 
+    @Column(name = "custom_workout_id")
     private Long customWorkoutId;
+
+    @Column(name = "exercise_id")
     private Long exerciseId;
 
     private int sets;
     private int repetitions;
+
+    @Column(name = "rest_interval")
     private int restInterval;
 
     // GETTERS AND SETTERS
@@ -66,4 +72,5 @@ public class CustomWorkoutExerciseEntity {
     public void setRestInterval(int restInterval) {
         this.restInterval = restInterval;
     }
+
 }

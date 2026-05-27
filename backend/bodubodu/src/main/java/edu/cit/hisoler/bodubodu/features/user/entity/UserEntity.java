@@ -23,6 +23,8 @@ public class UserEntity {
     private String password;
     private String role;
     private LocalDateTime createdAt = LocalDateTime.now();
+    private String passwordResetToken;
+    private LocalDateTime passwordResetTokenExpiresAt;
 
     // GETTERS AND SETTERS
 
@@ -46,4 +48,12 @@ public class UserEntity {
 
     public LocalDateTime getCreatedAt()              { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt){ this.createdAt = createdAt; }
+
+    public String getPasswordResetToken() { return passwordResetToken; }
+    public void setPasswordResetToken(String passwordResetToken) { this.passwordResetToken = passwordResetToken; }
+
+    public LocalDateTime getPasswordResetTokenExpiresAt() { return passwordResetTokenExpiresAt; }
+    public void setPasswordResetTokenExpiresAt(LocalDateTime passwordResetTokenExpiresAt) {
+        this.passwordResetTokenExpiresAt = passwordResetTokenExpiresAt;
+    }
 }

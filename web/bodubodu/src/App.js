@@ -11,6 +11,7 @@ import Dashboard from './features/dashboard/Dashboard';
 import Progress from './features/progress/Progress';
 import WorkoutHistory from './features/workouts/WorkoutHistory';
 import Profile from './features/profile/Profile';
+import ResetPassword from './features/auth/ResetPassword';
 
 // Protect routes (must be logged in)
 function ProtectedRoute({ children }) {
@@ -63,6 +64,7 @@ function App() {
         {/* Public Routes */}
         <Route path="/login"    element={<PublicRoute><AuthContainer /></PublicRoute>} />
         <Route path="/register" element={<PublicRoute><AuthContainer /></PublicRoute>} />
+        <Route path="/reset-password" element={<ResetPassword />} />
 
         {/* Protected Layout */}
         <Route element={<ProtectedRoute><DashboardLayout /></ProtectedRoute>}>

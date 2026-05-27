@@ -8,40 +8,42 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/bg_header"
+        android:background="#E65100"
         android:orientation="vertical"
         android:padding="24dp">
 
         <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="BoduBodu"
+            android:id="@+id/btnBack"
+            android:layout_width="48dp"
+            android:layout_height="40dp"
+            android:gravity="center_vertical"
+            android:text="‹"
             android:textColor="#FFFFFF"
-            android:textSize="20sp"
+            android:textSize="32sp"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/tvWelcome"
+            android:id="@+id/tvTitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:text="Welcome, User!"
+            android:text="Workout"
             android:textColor="#FFFFFF"
             android:textSize="26sp"
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/tvSubtitle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Ready for today's workout?"
+            android:layout_marginTop="4dp"
+            android:text="Exercise session"
             android:textColor="#FFCCBC"
             android:textSize="13sp" />
     </LinearLayout>
 
     <ScrollView
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1">
+        android:layout_height="match_parent">
 
         <LinearLayout
             android:id="@+id/screenContent"
@@ -50,6 +52,4 @@
             android:orientation="vertical"
             android:padding="16dp" />
     </ScrollView>
-
-    <include layout="@layout/bottom_nav" />
 </LinearLayout>

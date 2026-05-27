@@ -70,6 +70,7 @@ public class DefaultWorkoutService {
                                     exMap.put("exerciseName", e.getName());
                                     exMap.put("difficultyLevel", e.getDifficultyLevel());
                                     exMap.put("targetMuscleGroup", e.getTargetMuscleGroup());
+                                    exMap.put("video", e.getVideo());
                                 });
 
                         return exMap;

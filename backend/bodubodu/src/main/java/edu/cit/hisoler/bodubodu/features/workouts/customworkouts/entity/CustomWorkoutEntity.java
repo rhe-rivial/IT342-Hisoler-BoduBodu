@@ -9,10 +9,15 @@ public class CustomWorkoutEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "custom_workout_id")
     private Long customWorkoutId;
 
+    @Column(name = "user_id")
     private Long userId;
+
     private String name;
+
+    @Column(name = "created_at")
     private LocalDateTime createdAt = LocalDateTime.now();
 
     // GETTERS AND SETTERS
