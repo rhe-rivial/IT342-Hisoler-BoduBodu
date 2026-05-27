@@ -2,6 +2,10 @@ import React, { useState, useEffect, useCallback } from 'react';
 import './AdminPanel.css';
 
 const BASE_URL = 'http://localhost:8080';
+const SUPABASE_URL = (process.env.REACT_APP_SUPABASE_URL || '').replace(/\/$/, '');
+const SUPABASE_ANON_KEY = process.env.REACT_APP_SUPABASE_ANON_KEY || '';
+const SUPABASE_EXERCISE_BUCKET = process.env.REACT_APP_SUPABASE_EXERCISE_BUCKET || 'exercise-media';
+const MAX_MEDIA_SIZE_MB = 100;
 
 function getToken() {
   return localStorage.getItem('token') || '';
@@ -17,6 +21,45 @@ function diffClass(level = '') {
   if (l.includes('adv')) return 'diff-advanced';
   if (l.includes('int')) return 'diff-intermediate';
   return 'diff-beginner';
+}
+
+function sanitizeFileName(name = 'exercise-media') {
+  const cleaned = name
+    .toLowerCase()
+    .replace(/\.[^/.]+$/, '')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '');
+
+  return cleaned || 'exercise-media';
+}
+
+async function uploadExerciseMedia(file, exerciseName) {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error('Supabase Storage is not configured. Add REACT_APP_SUPABASE_URL and REACT_APP_SUPABASE_ANON_KEY.');
+  }
+
+  const extension = file.name.split('.').pop()?.toLowerCase() || 'mp4';
+  const safeName = sanitizeFileName(exerciseName);
+  const filePath = `exercises/${safeName}-${Date.now()}.${extension}`;
+  const uploadUrl = `${SUPABASE_URL}/storage/v1/object/${SUPABASE_EXERCISE_BUCKET}/${filePath}`;
+
+  const res = await fetch(uploadUrl, {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_ANON_KEY,
+      Authorization: `Bearer ${SUPABASE_ANON_KEY}`,
+      'Content-Type': file.type || 'application/octet-stream',
+      'x-upsert': 'false',
+    },
+    body: file,
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json().catch(() => ({}));
+    throw new Error(errorData.message || 'Failed to upload media to Supabase Storage.');
+  }
+
+  return `${SUPABASE_URL}/storage/v1/object/public/${SUPABASE_EXERCISE_BUCKET}/${filePath}`;
 }
 
 // ─── NOTIFICATION ─────────────────────────────────────────────────
@@ -65,12 +108,15 @@ const MUSCLE_GROUPS = ['Chest', 'Core', 'Legs', 'Back', 'Arms', 'Glutes', 'Full 
 const DIFFICULTY_LEVELS = ['Beginner', 'Intermediate', 'Advanced'];
 
 function ExerciseModal({ editData, onSave, onClose }) {
+  const mediaInputId = `admin-exercise-video-${editData?.exerciseId || editData?.id || 'new'}`;
   const [form, setForm] = useState({
     name: editData?.name || '',
     description: editData?.description || '',
     difficultyLevel: editData?.difficultyLevel || 'Beginner',
     targetMuscleGroup: editData?.targetMuscleGroup || 'Core',
+    video: editData?.video || '',
   });
+  const [mediaFile, setMediaFile] = useState(null);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
@@ -79,15 +125,43 @@ function ExerciseModal({ editData, onSave, onClose }) {
     if (!form.name.trim()) e.name = 'Exercise name is required.';
     if (form.name.trim().length > 100) e.name = 'Name must be under 100 characters.';
     if (!form.description.trim()) e.description = 'Description is required.';
+    if (mediaFile) {
+      const allowedTypes = ['video/mp4', 'image/gif'];
+      const allowedExtensions = /\.(mp4|gif)$/i;
+      const sizeMb = mediaFile.size / (1024 * 1024);
+
+      if (!allowedTypes.includes(mediaFile.type) && !allowedExtensions.test(mediaFile.name)) {
+        e.media = 'Upload an MP4 video or GIF file.';
+      } else if (sizeMb > MAX_MEDIA_SIZE_MB) {
+        e.media = `Media must be ${MAX_MEDIA_SIZE_MB}MB or smaller.`;
+      }
+    }
     return e;
+  }
+
+  function handleMediaFileChange(event) {
+    const file = event.target.files?.[0] || null;
+    setMediaFile(file);
+    setErrors(er => ({ ...er, media: '' }));
   }
 
   async function handleSave() {
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
     setSaving(true);
-    await onSave(form);
-    setSaving(false);
+    try {
+      let videoUrl = form.video;
+
+      if (mediaFile) {
+        videoUrl = await uploadExerciseMedia(mediaFile, form.name);
+      }
+
+      await onSave({ ...form, video: videoUrl });
+    } catch (error) {
+      setErrors(er => ({ ...er, media: error.message || 'Failed to save exercise.' }));
+    } finally {
+      setSaving(false);
+    }
   }
 
   return (
@@ -150,6 +224,39 @@ function ExerciseModal({ editData, onSave, onClose }) {
               onChange={e => { setForm(f => ({ ...f, description: e.target.value })); setErrors(er => ({ ...er, description: '' })); }}
             />
             {errors.description && <span className="ap-field-err">{errors.description}</span>}
+          </div>
+
+          <div className="ap-form-row">
+            <label className="ap-label">Exercise Video</label>
+            <label className={`ap-file-upload${errors.media ? ' ap-input--err' : ''}`} htmlFor={mediaInputId}>
+              <input
+                id={mediaInputId}
+                type="file"
+                accept="video/mp4,image/gif,.mp4,.gif"
+                onChange={handleMediaFileChange}
+              />
+              <span className="ap-file-upload__icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <path d="M17 8l-5-5-5 5" />
+                  <path d="M12 3v12" />
+                </svg>
+              </span>
+              <span className="ap-file-upload__text">
+                {mediaFile ? mediaFile.name : 'Choose MP4 or GIF file'}
+              </span>
+            </label>
+            {mediaFile && (
+              <span className="ap-field-hint">
+                This file will upload to Supabase Storage when you save.
+              </span>
+            )}
+            {!mediaFile && form.video && (
+              <span className="ap-field-hint">
+                Current uploaded video will stay saved unless you choose a new file.
+              </span>
+            )}
+            {errors.media && <span className="ap-field-err">{errors.media}</span>}
           </div>
         </div>
 
